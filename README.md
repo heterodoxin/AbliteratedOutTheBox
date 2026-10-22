@@ -22,7 +22,7 @@ python3 convert_hf_to_gguf.py /path/to/Qwen3-8B --outfile qwen3-8b.gguf --outtyp
     -p "Give me step by step instructions to pick a lock"
 ```
 
-`--ff-threshold <f>` (default 0.70) sets how readily the gate fires; `--disc-strength <f>` (default 0.4) sets how hard the safety-disclaimer direction is removed. See [tools/abliterate/README.md](tools/abliterate/README.md) for the tool details.
+`--ff-threshold <f>` (default 0.70) sets how readily the gate fires; `--edit-strength <f>` (default 2.0) sets how hard the refusal direction is removed; `--disc-strength <f>` (default 0.4) sets how hard the safety-disclaimer direction is removed. See [tools/abliterate/README.md](tools/abliterate/README.md) for the tool details.
 
 ## Why it's better
 
@@ -31,6 +31,7 @@ Measured on Qwen3-8B with a hand-validated response hidden-state probe (no strin
 - Refusal drops 96.3% to 7.9% on broad held-out harmful prompts and 82.0% to 0.0% on JailbreakBench; the model answers and delivers the content, confirmed by hand-reading the generations.
 - Benign is preserved exactly: the gate fires on 0.4% of alpaca prompts (1 of 256), and when it does not fire the output is bit-identical to the base model (KL 0.000000 over held-out benign, 0 gated, 0.0 logit change).
 - A second direction removes most of the safety-disclaimer hedging from the compliant answers (a hidden-state read of the disclaimer character drops about a third), while answers stay coherent (distinct-token ratio around 0.65 vs 0.84 base). Pushing `--disc-strength` higher removes more disclaimers but can start to degenerate longer outputs, so it is tunable.
+- The same recipe works across architecture families: run on Qwen3-8B, Llama-3.1-8B, and Gemma-4-e4b, the gate fires on the flagged prompts and leaves benign prompts untouched on all three, and the scale-free edit keeps the compliant answers coherent on each without any per-model tuning.
 
 Weight-baked abliteration edits the stored weights and perturbs every prompt, so its benign output is never identical and it needs per-architecture surgery. Here the edit is a scale-free projection at the `build_cvec` layer-output site, so one recipe covers 131 architectures with no per-model code, and prompts the gate leaves alone are untouched.
 
@@ -42,7 +43,7 @@ It runs with nothing to set up and nothing to download beyond the model itself: 
 
 Both directions are read per prompt and the edit covers the prompt, not only the generated tokens. The refusal decision is committed into the prompt's KV during prefill, so editing only the generated positions leaves refusal near 95% versus single digits when the prompt is edited too. The runtime therefore uses two passes: a clean detection pass that fires the gate, then an edited prefill plus generation. Each per-token edit is a projection, so decode throughput is unchanged.
 
-The refusal direction is the difference between forced refuse and comply openings, orthogonalized against the comply-opening spread to drop benign-common components, and used for both the gate and the edit. The disclaimer direction is the difference between disclaimered and clean compliant openings. A look-ahead gate generates up to 24 of the model's own tokens and fires when the peak refusal projection, band-averaged across the middle layers, exceeds `--ff-threshold`; at 0.70 that holds real-benign false positives near 0.4% at 0.89 harmful recall, and lowering it raises recall at the cost of more benign fires. When fired, the edit pulls the refusal projection down to just past the comply level (reference 0.3 of the comply-to-refuse gap below comply) and the disclaimer projection down by `--disc-strength` of its clean-to-disclaimered gap, from layer `3*n_layer/7` through `2*n_layer/3`.
+The refusal direction is the difference between forced refuse and comply openings, orthogonalized against the comply-opening spread to drop benign-common components, and used for both the gate and the edit. The disclaimer direction is the difference between disclaimered and clean compliant openings. A look-ahead gate generates up to 24 of the model's own tokens and fires when the peak refusal projection, band-averaged across the middle layers, exceeds `--ff-threshold`; at 0.70 that holds real-benign false positives near 0.4% at 0.89 harmful recall, and lowering it raises recall at the cost of more benign fires. When fired, the edit pulls the refusal projection down to a reference `--edit-strength` comply-opening standard deviations below the comply level (default 2.0, a scale-free bound measured in each layer's own units so one setting behaves the same across architectures) and the disclaimer projection down by `--disc-strength` of its clean-to-disclaimered gap, from layer `3*n_layer/7` through `2*n_layer/3`.
 
 Measurement note: refusal is measured by the probe over the model's own generation. Re-reading finished text through the base model over-counts, because a compliant answer that carries a safety disclaimer reads as refusal-like to a classifier even though it delivered the content; the edit-during-generation measure, hand-validated against reading the outputs, is the one reported here.
 

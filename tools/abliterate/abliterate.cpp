@@ -105,10 +105,12 @@ static void norm(std::vector<float> & v) { float n = sqrtf(dot(v, v)); for (floa
 int main(int argc, char ** argv) {
     float ff_th = 0.70f;      // gate fires above this; higher = fewer benign false positives, lower recall
     float disc_s = 0.4f;      // disclaimer-removal strength (fraction past the clean-compliance level); higher removes more disclaimers but can degenerate, negative effectively disables
+    float edit_s = 2.0f;      // refusal-removal strength in comply-opening std past comply; higher removes refusals harder on resistant architectures but can degenerate
     std::vector<char *> rest; rest.push_back(argv[0]);
     for (int i = 1; i < argc; i++) {
         if (std::strcmp(argv[i], "--ff-threshold") == 0 && i + 1 < argc) { ff_th = atof(argv[++i]); }
         else if (std::strcmp(argv[i], "--disc-strength") == 0 && i + 1 < argc) { disc_s = atof(argv[++i]); }
+        else if (std::strcmp(argv[i], "--edit-strength") == 0 && i + 1 < argc) { edit_s = atof(argv[++i]); }
         else { rest.push_back(argv[i]); }
     }
 
@@ -171,9 +173,12 @@ int main(int argc, char ** argv) {
             norm(v); float pd = dot(g, v); for (int j = 0; j < D; j++) { g[j] -= pd * v[j]; }
         }
         norm(g); rg[l] = g;
-        float sc = 0, sr = 0; for (auto & hc : HC) { sc += dot(hc[l], g); } for (auto & hr : HR) { sr += dot(hr[l], g); }
-        pcg[l] = sc / HC.size(); prg[l] = sr / HR.size();
-        cref[l] = pcg[l] - 0.3f * (prg[l] - pcg[l]);  // refusal reference: just past comply
+        std::vector<float> cps; for (auto & hc : HC) { cps.push_back(dot(hc[l], g)); }
+        float m = 0; for (float x : cps) { m += x; } m /= cps.size();
+        float var = 0; for (float x : cps) { var += (x - m) * (x - m); } var /= cps.size();
+        float sr = 0; for (auto & hr : HR) { sr += dot(hr[l], g); }
+        pcg[l] = m; prg[l] = sr / HR.size();
+        cref[l] = pcg[l] - edit_s * sqrtf(var);  // refusal reference bounded by the comply-opening spread, scale-free across architectures
     }
     for (int l : edit_layers) {
         std::vector<float> mcl = mean_of(CL, l), mds = mean_of(DS, l);
