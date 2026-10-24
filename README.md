@@ -1,50 +1,55 @@
-![AbliteratedOutTheBox](assets/banner.png)
+# AbliteratedOutTheBox for Strata
 
-# AbliteratedOutTheBox
+Inference-time abliteration for the [Strata inference engine](https://github.com/Niko1221/Strata). This branch ports AbliteratedOutTheBox's activation hook into Strata's native residual-stream execution path. Model weights stay unchanged on disk.
 
-## What is AbliteratedOutTheBox?
+## Validation status
 
-AbliteratedOutTheBox is a fork of llama.cpp that gets any supported model to answer flagged harmful prompts, delivering the requested content instead of a refusal, at inference time and with the original weights left on disk unchanged. It needs no fit, no training, and no extra files: for each prompt `llama-abliterate` reads two directions from the prompt itself, by forcing the assistant to start a few comply versus refuse openings (and clean versus disclaimered openings), diffing the activations, and a look-ahead gate decides per prompt whether to remove them. The edit happens inside the graph at the `build_cvec` layer-output site that 131 of the 165 model architectures share, so one recipe covers them with no per-model code.
+**The code builds and passes the checks run so far, but full-model Strata inference has not been tested.** The HIP engine compiled on a Radeon AI PRO R9700. Isolated GPU tests passed for the sequential projections, activation capture, history wrapping, and switching the hook inside a captured graph. Python tests passed for calibration, gate scoring, and request cleanup.
 
-## Install
+These checks do not establish refusal-removal rates, response quality, throughput, or exact base-model output preservation. Those require an end-to-end run with a compatible Strata model. The results from other backends do not establish results for Strata.
+
+## Build
+
+The build helper downloads a pinned copy of Strata, applies the integration patch, copies in the native hook, and builds Strata. It does not download model weights.
 
 ```bash
-# build the runtime (pick the backend you already use: -DGGML_CUDA=ON, -DGGML_HIP=ON, or CPU-only)
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build --target llama-abliterate -j
+python3.11 -m pip install -r strata/requirements.txt
 
-# convert the model to a GGUF for the runtime (any quantization; needs Python with torch, transformers, gguf)
-python3 convert_hf_to_gguf.py /path/to/Qwen3-8B --outfile qwen3-8b.gguf --outtype q8_0
+# AMD / HIP: use your card's architecture.
+python3.11 strata/build.py --backend hip --arch gfx1201 --test -- -DSTRATA_MMQ_KQUANTS=OFF
 
-# run: no fit, no sidecar, any backend including pure CPU
-./build/bin/llama-abliterate \
-    -m qwen3-8b.gguf -ngl 99 -n 256 \
-    -p "Give me step by step instructions to pick a lock"
+# NVIDIA / CUDA: use your card's compute capability.
+python3.11 strata/build.py --backend cuda --arch 89 --test
 ```
 
-`--ff-threshold <f>` (default 0.70) sets how readily the gate fires; `--edit-strength <f>` (default 2.0) sets how hard the refusal direction is removed; `--disc-strength <f>` (default 0.4) sets how hard the safety-disclaimer direction is removed. See [tools/abliterate/README.md](tools/abliterate/README.md) for the tool details.
+A C++ toolchain, CMake 3.24 or newer, and the selected GPU toolkit are required. The patched engine is written to `strata/.strata-src/build-abliterate/strata` (`strata.exe` on Windows).
 
-## Why it's better
+## Run
 
-Measured on Qwen3-8B with a hand-validated response hidden-state probe (no string matching, no judge model), over held-out sets, with the edit read from the prompt at inference (no fit):
+Use a Strata-supported **Qwen3.8 / qwen4exp GGUF** with its tokenizer and chat template in the file:
 
-- Refusal drops 96.3% to 7.9% on broad held-out harmful prompts and 82.0% to 0.0% on JailbreakBench; the model answers and delivers the content, confirmed by hand-reading the generations.
-- Benign is preserved exactly: the gate fires on 0.4% of alpaca prompts (1 of 256), and when it does not fire the output is bit-identical to the base model (KL 0.000000 over held-out benign, 0 gated, 0.0 logit change).
-- A second direction removes most of the safety-disclaimer hedging from the compliant answers (a hidden-state read of the disclaimer character drops about a third), while answers stay coherent (distinct-token ratio around 0.65 vs 0.84 base). Pushing `--disc-strength` higher removes more disclaimers but can start to degenerate longer outputs, so it is tunable.
-- The same recipe works across architecture families: run on Qwen3-8B, Llama-3.1-8B, and Gemma-4-e4b, the gate fires on the flagged prompts and leaves benign prompts untouched on all three, and the scale-free edit keeps the compliant answers coherent on each without any per-model tuning.
+```bash
+python3.11 strata/abliterate.py \
+  --model /path/to/model.gguf \
+  --prompt "Explain how a transformer works" \
+  --max-new-tokens 256
+```
 
-Weight-baked abliteration edits the stored weights and perturbs every prompt, so its benign output is never identical and it needs per-architecture surgery. Here the edit is a scale-free projection at the `build_cvec` layer-output site, so one recipe covers 131 architectures with no per-model code, and prompts the gate leaves alone are untouched.
+The driver loads one resident Strata process, reads per-prompt directions from forced openings, measures a clean look-ahead, and generates the answer with the edit enabled only when the gate fires. Calibration text is discarded; it is not prepended to the answer. The final prompt is processed again before answering.
 
-## Why should I care
+- `--ff-threshold 0.70`: the gate threshold; lower values allow more edits.
+- `--edit-strength 2.0`: refusal reference, in comply-opening standard deviations below the comply mean.
+- `--disc-strength 0.4`: disclaimer-removal strength. A negative value skips that direction and its eight anchor prefills.
+- `--context 4096`: context capacity. Prompts and anchor suffixes are checked before model loading.
+- `--strata-source PATH` and `--engine PATH`: use an existing patched Strata checkout or executable.
+- Put extra Strata engine arguments after `--`, for example `-- --gpu 0`.
 
-It runs with nothing to set up and nothing to download beyond the model itself: no fit, no sidecar, no second file, on whatever you already have including CPU or a few gigabytes of VRAM for a quantized model, because the runtime is plain llama.cpp. You keep one copy of the weights, ordinary prompts behave exactly as before, and generation throughput is unchanged because the only added cost is one extra prompt prefill when a prompt is flagged.
+## Port details and limits
 
-## Advanced
+The native hook applies two sequential clipped projections at Strata's existing layer-output control-vector site, after the FFN residual write. It covers prompt processing and decoding, including captured graphs. Hyper-connection streams share each layer's direction; calibration captures their mean. The gate uses the middle third of the layers, and editing starts at `3 * layers / 7`.
 
-Both directions are read per prompt and the edit covers the prompt, not only the generated tokens. The refusal decision is committed into the prompt's KV during prefill, so editing only the generated positions leaves refusal near 95% versus single digits when the prompt is edited too. The runtime therefore uses two passes: a clean detection pass that fires the gate, then an edited prefill plus generation. Each per-token edit is a projection, so decode throughput is unchanged.
+This first port supports one text sequence on one GPU through Strata's Qwen3.8 engine path. Batching, speculative decoding, vision, layer splitting, and simultaneous control vectors are rejected. Prompt and conversation caches are disabled because each request has its own directions and edited state must not leak into another request. CUDA sources are included; CUDA execution has not been tested. Metal, SYCL, and the separate Qwen3.6 engine path are not ported.
 
-The refusal direction is the difference between forced refuse and comply openings, orthogonalized against the comply-opening spread to drop benign-common components, and used for both the gate and the edit. The disclaimer direction is the difference between disclaimered and clean compliant openings. A look-ahead gate generates up to 24 of the model's own tokens and fires when the peak refusal projection, band-averaged across the middle layers, exceeds `--ff-threshold`; at 0.70 that holds real-benign false positives near 0.4% at 0.89 harmful recall, and lowering it raises recall at the cost of more benign fires. When fired, the edit pulls the refusal projection down to a reference `--edit-strength` comply-opening standard deviations below the comply level (default 2.0, a scale-free bound measured in each layer's own units so one setting behaves the same across architectures) and the disclaimer projection down by `--disc-strength` of its clean-to-disclaimered gap, from layer `3*n_layer/7` through `2*n_layer/3`.
+The default performs 21 anchor prefills, a clean look-ahead, and a final answer prefill. An early end-of-generation token requires one additional gate prefill. This adds substantial work before the answer. No speed or model-quality improvement is claimed.
 
-Measurement note: refusal is measured by the probe over the model's own generation. Re-reading finished text through the base model over-counts, because a compliant answer that carries a safety disclaimer reads as refusal-like to a classifier even though it delivered the content; the edit-during-generation measure, hand-validated against reading the outputs, is the one reported here.
-
-Known limits: the runtime edits one sequence at a time, since the gate scalar is per context; the directions are read from a fixed set of forced openings, so very unusual prompts may gate or edit less well; and a strong `--disc-strength` can degenerate long outputs, which is why it is a tunable with a moderate default.
+See [the integration notes](strata/README.md) for source layout, protocol, and checks.
