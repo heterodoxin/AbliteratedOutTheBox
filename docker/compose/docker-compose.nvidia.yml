@@ -1,0 +1,41 @@
+# Strata on an NVIDIA card (RTX 20 to 50, and older cards with the cuda12 image). Needs the NVIDIA Container Toolkit on the host.
+#
+#   cp .env.example .env        # then edit: the model, the key
+#   docker compose -f docker-compose.nvidia.yml up -d
+#   docker compose -f docker-compose.nvidia.yml logs -f        # the first start downloads the model (resumable)
+#
+# Image: cuda13 for RTX 20-50 with driver 580 or newer; cuda12 for Pascal / Volta (GTX 10, Tesla P100, V100) or drivers 575-579.
+# Images: ghcr.io/niko1221/strata (published from 0.2.1 on). To use one you built yourself: STRATA_IMAGE=strata:0.2.3-<flavor> docker compose up -d
+services:
+  strata:
+    image: ${STRATA_IMAGE:-ghcr.io/niko1221/strata:0.2.3-cuda13}
+    container_name: strata
+    restart: unless-stopped
+    ports:
+      - "${STRATA_BIND:-127.0.0.1}:${STRATA_PORT:-8080}:8080"      # 127.0.0.1 = this computer only. 0.0.0.0 = your network: keep the API key then.
+    environment:
+      MODEL: ${MODEL:-}                      # empty: Strata picks the one it recommends for your card, and says so in the log
+      MODEL_PATH: ${MODEL_PATH:-}            # GGUF files you already have, as seen inside the container (mount them below)
+      CONTEXT: ${CONTEXT:-32k}
+      PARALLEL: ${PARALLEL:-}                # empty: fit to the card
+      VISION: ${VISION:-off}                 # on: the model reads pictures (about 0.9 GB more to download)
+      TUNE: ${TUNE:-skip}                    # quick: up to about 20 minutes, once, then kept
+      API_KEY: ${API_KEY:-}                  # empty: made on the first start; docker exec strata strata launch --show-key
+      # GPUS: "0,1"                          # several cards: which ones
+    volumes:
+      - strata-data:/data                    # the model, presets, tuning, the key. Survives updates of the image.
+      # - /srv/gguf/IQ3_XXS:/models:ro       # GGUF files you already have (then also set MODEL_PATH: /models)
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all                     # or: device_ids: ["0"]
+              capabilities: [gpu]
+    # the short form of the same: gpus: all
+    ulimits:
+      memlock: { soft: -1, hard: -1 }        # the engine pins tens of GB of RAM
+    shm_size: 2gb
+    stop_grace_period: 2m                    # the model drains and unloads on docker stop
+volumes:
+  strata-data:

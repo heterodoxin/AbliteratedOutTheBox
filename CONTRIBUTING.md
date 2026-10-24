@@ -1,209 +1,122 @@
-# Contributors
+# Contributing to Strata
 
-The project differentiates between 3 levels of contributors:
+**AI assistance is welcome. The contributor is responsible for understanding the change and supplying real evidence.**
 
-- Contributors: people who have contributed before (no special privileges)
-- Collaborators (Triage): people with significant contributions, who may be responsible for some parts of the code, and are expected to maintain and review contributions for the code they own
-- Maintainers: responsible for reviewing and merging PRs, after approval from the code owners
+These rules apply to issues, pull requests, benchmark reports, and the agents helping prepare them.
+You should be able to explain every changed line and answer review questions about it.
 
-# AI Usage Policy
+## Before starting
 
-> [!IMPORTANT]
->
-> AI-generated code is allowed. You are 100% responsible for every line, however it was produced.
->
-> Undisclosed AI usage may result in your account being permanently banned from contributing to the project.
->
-> Detailed information regarding permissible and restricted uses of AI can be found in the [AGENTS.md](AGENTS.md) file.
+1. Search [issues](https://github.com/Niko1221/Strata/issues) and
+   [pull requests](https://github.com/Niko1221/Strata/pulls), including closed discussions. Add new evidence to an
+   existing thread when it covers your problem.
+2. Read [AGENTS.md](AGENTS.md) and the documentation for the component you want to change.
+3. Get maintainer agreement on scope before substantial features, refactors, architecture changes, or changes to
+   defaults. Describe the user problem, proposed behavior, and tradeoffs in an issue first. Agreement on scope
+   does not guarantee a merge. Focused fixes and benchmark reports can go straight to a PR.
+4. Keep one problem per PR. Update that PR after feedback; do not open competing attempts for the same change.
 
-If AI is used to generate any portion of the code, contributors must adhere to the following requirements:
+Do not resubmit a declined proposal under a different title or through another agent. If new evidence changes
+the situation, bring it to the original discussion and let a maintainer decide whether to reopen it.
 
-1. Explicitly disclose the manner in which AI was employed.
-2. Check for an existing PR addressing the same change; if one exists, comment there to work with its author instead of opening a duplicate.
-3. Perform a comprehensive manual review prior to submitting the pull request. A proper code review usually takes something like one hour per 200-400 LOC and you should be spending **at least that much time on code review alone**.
-4. Be prepared to explain every line of code you submit when asked about it by a maintainer.
-5. It is strictly prohibited to use AI to write your posts for you (bug reports, feature requests, pull request descriptions, Github discussions, responding to humans, ...).
+## Report a problem people can investigate
 
-For more info, please refer to the [AGENTS.md](AGENTS.md) file.
+Use the matching [issue form](https://github.com/Niko1221/Strata/issues/new/choose). A bug report should include:
 
-# Pull requests (for contributors & collaborators)
+- The smallest steps or command that reproduce the problem, and the expected and actual behavior.
+- Strata version or commit, OS, GPU and VRAM, and relevant model, quantization, and configuration.
+- The exact error and relevant logs, with credentials and private content removed.
+- Whether you reproduced it yourself. Label a finding based only on reading code or a scanner as
+  **unconfirmed static analysis**, and explain the suspected path without presenting it as an observed failure.
 
-### Before you start
+Do not invent reproduction steps, errors, affected hardware, or severity. If you cannot reproduce something,
+say what you inspected and what would verify the hypothesis. Feature requests should explain a concrete user
+need and the current workaround. Questions should say what you tried and where you got stuck.
 
-- Search for existing discussions and PRs first - duplicates will likely be closed without questions.
-- Features must begin with an issue, not a PR - let interest accumulate before writing code; niche features may only land as an example/tool, or on a private fork.
-- Bug-fix PRs must include a reproducible issue and a regression test that fails before your change and passes after. Fixes without a test may be closed without review.
-- New CLI or public API additions carry a **higher bar** than internal changes - justify why an existing mechanism doesn't suffice.
-- Meeting all of the above still doesn't guarantee a merge - see [Pull requests (for maintainers)](#pull-requests-for-maintainers).
-- If you are a new contributor
-    - Limit your open PRs to 1
-    - Do not submit trivial fixes (e.g. typos, formatting changes)
+Example structure, with placeholders to replace with actual observations:
 
-### Preparing your PR
+```text
+Problem: <one observed behavior>
+Environment: <commit, OS, GPU/VRAM, model/quant, relevant settings>
+Reproduce: <exact command or short sequence>
+Expected: <documented or intended behavior>
+Actual: <observed behavior and exact error>
+Evidence: <sanitized log attachment>
+Reproduction status: <reproduced locally OR unconfirmed static analysis>
+```
 
-- llama.cpp uses the ggml tensor library for model evaluation. If you are unfamiliar with ggml, consider taking a look at the [examples in the ggml repository](https://github.com/ggml-org/ggml/tree/master/examples/). [simple](https://github.com/ggml-org/ggml/tree/master/examples/simple) shows the bare minimum for using ggml. [gpt-2](https://github.com/ggml-org/ggml/tree/master/examples/gpt-2) has minimal implementations for language model inference using GPT-2. [mnist](https://github.com/ggml-org/ggml/tree/master/examples/mnist) demonstrates how to train and evaluate a simple image classifier
-- Test your changes:
-  - Execute [the full CI locally on your machine](ci/README.md) before publishing
-  - Verify that the perplexity and the performance are not affected negatively by your changes (use `llama-perplexity` and `llama-bench`)
-  - If you modified the `ggml` source, run the `test-backend-ops` tool to check whether different backend implementations of the `ggml` operators produce consistent results (this requires access to at least two different `ggml` backends)
-  - If you modified a `ggml` operator or added a new one, add the corresponding test cases to `test-backend-ops`
-- Create separate PRs for each feature or fix:
-  - Avoid combining unrelated changes in a single PR
-  - When adding support for a new model or feature, focus on **CPU support only** in the initial PR unless you have a good reason not to. Add support for other backends like CUDA in follow-up PRs
-  - In particular, adding new data types (extension of the `ggml_type` enum) carries with it a disproportionate maintenance burden. As such, to add a new quantization type you will need to meet the following *additional* criteria *at minimum*:
-    - convert a small model to GGUF using the new type and upload it to HuggingFace
-    - provide [perplexity](https://github.com/ggml-org/llama.cpp/tree/master/tools/perplexity) comparisons to FP16/BF16 (whichever is the native precision) as well as to types of similar size
-    - provide KL divergence data calculated vs. the FP16/BF16 (whichever is the native precision) version for both the new type as well as types of similar size
-    - provide [performance data](https://github.com/ggml-org/llama.cpp/tree/master/tools/llama-bench) for the new type in comparison to types of similar size on pure CPU
-- Consider allowing write access to your branch for faster reviews, as reviewers can push commits directly
+## Titles
 
-### After submitting your PR
+Every issue and pull request title starts with its area in square brackets, then a short description: `[Engine]`, `[GUI]`, `[TUI]`,
+`[Benchmark]`, `[Docs]` or `[Other]`. For example `[Engine] fix decode stop on long prompts` or `[GUI] keep the model list after a tab
+switch`. The issue forms ask for the area and a check on the title fails when the prefix is missing.
 
-- Expect requests for modifications to ensure the code meets llama.cpp's standards for quality and long-term maintainability
-- Maintainers will rely on your insights and approval when making a final decision to approve and merge a PR
-- If your PR becomes stale, rebase it on top of latest `master` to get maintainers attention
-- Consider adding yourself to [CODEOWNERS](CODEOWNERS) to indicate your availability for fixing related issues and reviewing related PRs
+## Prepare a focused pull request
 
-# Pull requests (for maintainers)
+Lead with the problem and resulting behavior. Explain why the approach is needed, the important limits, and
+any compatibility effects. Link the issue and scope agreement when applicable. A file-by-file narration or
+an AI-generated summary of the diff is not a substitute for this explanation.
 
-- Squash-merge PRs
-- Use the following format for the squashed commit title: `<module> : <commit title> (#<issue_number>)`. For example: `utils : fix typo in utils.py (#1234)`
-- Optionally pick a `<module>` from here: https://github.com/ggml-org/llama.cpp/wiki/Modules
-- Let other maintainers merge their own PRs
-- When merging a PR, make sure you have a good understanding of the changes
-- If a PR does not warrant a new release, add `[no release]` in the squashed commit to spare CI resources
-- Be mindful of maintenance: most of the work going into a feature happens after the PR is merged. If the PR author is not committed to contribute long-term, someone else needs to take responsibility (you)
-- Add the ["merge ready"](https://github.com/ggml-org/llama.cpp/pulls?q=is%3Apr+is%3Aopen+draft%3Ano+sort%3Aupdated-desc+label%3A%22merge+ready%22+) label to a PR to indicate when a PR can be fast-merged without waiting for 2 independent reviews. [(more info)](https://github.com/ggml-org/llama.cpp/pull/26178)
-- Wait for CI results before merging
+- Keep unrelated formatting, cleanup, dependency changes, and speculative abstractions out of the PR.
+- Add documentation where it changes what a user or developer needs to know. Avoid repeated summaries,
+  speculative roadmaps, and generated documentation with no actionable information.
+- Preserve existing behavior outside the intended change. New features are opt-in; follow the default-path
+  and performance requirements in [AGENTS.md](AGENTS.md).
+- Read the complete diff, including generated files, before submitting. Remove debugging output, secrets,
+  private paths, and accidental files.
+- Prefer a small relevant regression check over tests that only restate the implementation. Documentation-only
+  changes need link, example, and consistency checks; they do not require GPU builds.
 
-Maintainers reserve the right to decline review or close pull requests for any reason, without any questions, particularly under any of the following conditions:
-- The proposed change is already mentioned in the roadmap or an existing issue, and it has been assigned to someone.
-- The pull request duplicates an existing one.
-- The contributor fails to adhere to this contributing guide or the AI policy.
-- The change doesn't fit the existing architecture, or is too complex to justify its benefit.
+## Show the validation you actually performed
 
-# Coding guidelines
+List exact commands, the revision and environment tested, and observed outcomes. Keep **passed**, **failed**,
+and **not run** separate. Include relevant output or a log attachment. A command you suggest running is not
+evidence that it passed; a CI run on a different revision is not validation of the submitted code.
 
-- Avoid adding third-party dependencies, extra files, extra headers, etc.
-- Always consider cross-compatibility with other operating systems and architectures
-- Avoid fancy-looking modern STL constructs, use basic `for` loops, avoid templates, keep it simple
-- Vertical alignment makes things more readable and easier to batch edit
-- Clean-up any trailing whitespaces, use 4 spaces for indentation, brackets on the same line, `void * ptr`, `int & a`
-- Use sized integer types such as `int32_t` in the public API, e.g. `size_t` may also be appropriate for allocation sizes or byte offsets
-- Declare structs with `struct foo {}` instead of `typedef struct foo {} foo`
-    - In C++ code omit optional `struct` and `enum` keyword whenever they are not necessary
-    ```cpp
-    // OK
-    llama_context * ctx;
-    const llama_rope_type rope_type;
+Build every backend a code change touches, including CUDA, HIP, and SYCL where applicable, before requesting
+review. For changes that need hardware execution, report that execution separately from compilation. A mock,
+static check, or successful build does not establish hardware correctness. If you lack a required environment,
+keep the PR as a draft, identify the missing checks, and ask for targeted help in the same thread. Do not claim
+compatibility you have not tested.
 
-    // not OK
-    struct llama_context * ctx;
-    const enum llama_rope_type rope_type;
-    ```
+Performance claims need before/after runs on the same hardware and workload, with every changed setting
+identified. Preserve the individual runs, failures, and variability. Follow the
+[community measurement guide](docs/COMMUNITY_BENCHMARKS.md); standard submissions will use the
+[benchmark protocol](docs/BENCHMARK_PROTOCOL.md) once it is activated. One fast run does not justify changing a
+default or claiming a speedup for other machines.
 
-    _(NOTE: this guideline is yet to be applied to the `llama.cpp` codebase. New code should follow this guideline.)_
+Example PR body; placeholders are not test results:
 
-- Try to follow the existing patterns in the code (indentation, spaces, etc.). In case of doubt use `clang-format` (from clang-tools v15+) to format the added code
-- For anything not covered in the current guidelines, refer to the [C++ Core Guidelines](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines)
-- Tensors store data in row-major order. We refer to dimension 0 as columns, 1 as rows, 2 as matrices
-- Matrix multiplication is unconventional: [`C = ggml_mul_mat(ctx, A, B)`](https://github.com/ggml-org/llama.cpp/blob/880e352277fc017df4d5794f0c21c44e1eae2b84/ggml.h#L1058-L1064) means $C^T = A B^T \Leftrightarrow C = B A^T.$
+```text
+Problem and result: <trigger; behavior before and after the change>
+Related discussion: <issue URL and scope agreement, when required>
+Approach: <why this fix; relevant compatibility effects>
+Validation:
+  Passed: <exact command, revision/environment, observed result, log>
+  Failed: <exact command and failure, or none observed>
+  Not run: <check, reason, and what remains unverified>
+Limits: <known limitations or remaining work>
+```
 
-![matmul](media/matmul.png)
+## Rules for AI-assisted work
 
-# Naming guidelines
+Use agents to help investigate, implement, and explain work that you can review. Before submitting, verify
+their claims against the source, actual command output, or a cited primary reference.
 
-- Use `snake_case` for function, variable and type names
-- Naming usually optimizes for longest common prefix (see https://github.com/ggml-org/ggml/pull/302#discussion_r1243240963)
+Never submit fabricated measurements, invented test results, fake logs, or copied claims you have not checked.
+Do not turn a repository scan into a batch of speculative issues or PRs. Consolidate related findings, establish
+their effect, and submit the useful evidence. Do not present an agent's confidence or another model's approval
+as validation. Keep review replies concise and address the requested change or evidence directly.
 
-    ```cpp
-    // not OK
-    int small_number;
-    int big_number;
+Maintainers may request a smaller change, return a PR to draft, or close a submission that lacks evidence,
+duplicates existing work, or ignores agreed scope. A smaller, understandable contribution with honest limits
+is easier to review and maintain.
 
-    // OK
-    int number_small;
-    int number_big;
-    ```
+## Share a benchmark
 
-- Enum values are always in upper case and prefixed with the enum name
+A results-only PR should contain the human report, raw measurements, sanitized configuration, and supporting
+logs. Keep it separate from engine changes and include poor results and failed requests.
 
-    ```cpp
-    enum llama_vocab_type {
-        LLAMA_VOCAB_TYPE_NONE = 0,
-        LLAMA_VOCAB_TYPE_SPM  = 1,
-        LLAMA_VOCAB_TYPE_BPE  = 2,
-        LLAMA_VOCAB_TYPE_WPM  = 3,
-        LLAMA_VOCAB_TYPE_UGM  = 4,
-        LLAMA_VOCAB_TYPE_RWKV = 5,
-    };
-    ```
-
-- The general naming pattern is `<class>_<method>`, with `<method>` being `<action>_<noun>`
-
-    ```cpp
-    llama_model_init();           // class: "llama_model",         method: "init"
-    llama_sampler_chain_remove(); // class: "llama_sampler_chain", method: "remove"
-    llama_sampler_get_seed();     // class: "llama_sampler",       method: "get_seed"
-    llama_set_embeddings();       // class: "llama_context",       method: "set_embeddings"
-    llama_n_threads();            // class: "llama_context",       method: "n_threads"
-    llama_adapter_lora_free();    // class: "llama_adapter_lora",  method: "free"
-    ```
-
-    - The `get` `<action>` can be omitted
-    - The `<noun>` can be omitted if not necessary
-    - The `_context` suffix of the `<class>` is optional. Use it to disambiguate symbols when needed
-    - Use `init`/`free` for constructor/destructor `<action>`
-
-- Use the `_t` suffix when a type is supposed to be opaque to the user - it's not relevant to them if it is a struct or anything else
-
-    ```cpp
-    typedef struct llama_context * llama_context_t;
-
-    enum llama_pooling_type llama_pooling_type(const llama_context_t ctx);
-    ```
-
-    _(NOTE: this guideline is yet to be applied to the `llama.cpp` codebase. New code should follow this guideline)_
-
-- C/C++ filenames are all lowercase with dashes. Headers use the `.h` extension. Source files use the `.c` or `.cpp` extension
-- Python filenames are all lowercase with underscores
-
-- _(TODO: abbreviations usage)_
-
-# Preprocessor directives
-
-- _(TODO: add guidelines with examples and apply them to the codebase)_
-
-    ```cpp
-    #ifdef FOO
-    #endif // FOO
-    ```
-
-# Code maintenance
-
-- Existing code should have designated collaborators and/or maintainers specified in the [CODEOWNERS](CODEOWNERS) file responsible for:
-  - Reviewing and merging related PRs
-  - Fixing related bugs
-  - Providing developer guidance/support
-
-- When adding or modifying a large piece of code:
-  - If you are a collaborator, make sure to add yourself to [CODEOWNERS](CODEOWNERS) to indicate your availability for reviewing related PRs
-  - If you are a contributor, find an existing collaborator who is willing to review and maintain your code long-term
-  - Provide the necessary CI workflow (and hardware) to test your changes (see [ci/README.md](https://github.com/ggml-org/llama.cpp/tree/master/ci))
-
-- New code should follow the guidelines (coding, naming, etc.) outlined in this document. Exceptions are allowed in isolated, backend-specific parts of the code that do not interface directly with the `ggml` interfaces.
-  _(NOTE: for legacy reasons, existing code is not required to follow this guideline)_
-
-- For changes in server, please make sure to refer to the [server development documentation](./tools/server/README-dev.md)
-
-# Documentation
-
-- Documentation is a community effort
-- When you need to look into the source code to figure out how to use an API consider adding a short summary to the header file for future reference
-- When you notice incorrect or outdated documentation, please update it
-
-# Resources
-
-The Github issues, PRs and discussions contain a lot of information that can be useful to get familiar with the codebase. For convenience, some of the more important information is referenced from Github projects:
-
-https://github.com/ggml-org/llama.cpp/projects
+The [current community benchmark guide](docs/COMMUNITY_BENCHMARKS.md) remains available for measurements made
+with today's tools. The [new protocol](docs/BENCHMARK_PROTOCOL.md) defines the draft standard and future approval
+workflow. Its draft status must remain visible: existing reports are not automatically standard or approved.

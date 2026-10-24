@@ -1,0 +1,203 @@
+{
+  "method": "Eight simulated AI personas; independent review, peer critique and common ballot. Not a human user study.",
+  "model": "gpt-6.1-sol",
+  "effort": "medium",
+  "ballots": 8,
+  "valid_votes": 160,
+  "decision_rule": "At least 5 of 8 for a majority; no deciding vote from coordinator.",
+  "majority_decisions": 18,
+  "unanimous_decisions": 14,
+  "results": [
+    {
+      "id": "B01",
+      "counts": {
+        "YES": 8
+      },
+      "majority": "YES",
+      "unanimous": true
+    },
+    {
+      "id": "B02",
+      "counts": {
+        "TWO": 1,
+        "CONTEXT": 7
+      },
+      "majority": "CONTEXT",
+      "unanimous": false
+    },
+    {
+      "id": "B03",
+      "counts": {
+        "RATES": 6,
+        "MEMORY": 2
+      },
+      "majority": "RATES",
+      "unanimous": false
+    },
+    {
+      "id": "B04",
+      "counts": {
+        "YES": 8
+      },
+      "majority": "YES",
+      "unanimous": true
+    },
+    {
+      "id": "B05",
+      "counts": {
+        "YES": 8
+      },
+      "majority": "YES",
+      "unanimous": true
+    },
+    {
+      "id": "B06",
+      "counts": {
+        "UNIQUE": 6,
+        "SELECTOR": 2
+      },
+      "majority": "UNIQUE",
+      "unanimous": false
+    },
+    {
+      "id": "B07",
+      "counts": {
+        "YES": 8
+      },
+      "majority": "YES",
+      "unanimous": true
+    },
+    {
+      "id": "B08",
+      "counts": {
+        "BOTH": 4,
+        "PRIMARY": 1,
+        "FIT": 3
+      },
+      "majority": null,
+      "unanimous": false
+    },
+    {
+      "id": "B09",
+      "counts": {
+        "YES": 8
+      },
+      "majority": "YES",
+      "unanimous": true
+    },
+    {
+      "id": "B10",
+      "counts": {
+        "YES": 8
+      },
+      "majority": "YES",
+      "unanimous": true
+    },
+    {
+      "id": "B11",
+      "counts": {
+        "YES": 8
+      },
+      "majority": "YES",
+      "unanimous": true
+    },
+    {
+      "id": "B12",
+      "counts": {
+        "OPTIONAL": 6,
+        "FIVE": 2
+      },
+      "majority": "OPTIONAL",
+      "unanimous": false
+    },
+    {
+      "id": "B13",
+      "counts": {
+        "KEEP": 4,
+        "RENAME": 4
+      },
+      "majority": null,
+      "unanimous": false
+    },
+    {
+      "id": "B14",
+      "counts": {
+        "YES": 8
+      },
+      "majority": "YES",
+      "unanimous": true
+    },
+    {
+      "id": "B15",
+      "counts": {
+        "YES": 8
+      },
+      "majority": "YES",
+      "unanimous": true
+    },
+    {
+      "id": "B16",
+      "counts": {
+        "YES": 8
+      },
+      "majority": "YES",
+      "unanimous": true
+    },
+    {
+      "id": "B17",
+      "counts": {
+        "YES": 8
+      },
+      "majority": "YES",
+      "unanimous": true
+    },
+    {
+      "id": "B18",
+      "counts": {
+        "YES": 8
+      },
+      "majority": "YES",
+      "unanimous": true
+    },
+    {
+      "id": "B19",
+      "counts": {
+        "VISIBLE": 8
+      },
+      "majority": "VISIBLE",
+      "unanimous": true
+    },
+    {
+      "id": "B20",
+      "counts": {
+        "YES": 8
+      },
+      "majority": "YES",
+      "unanimous": true
+    }
+  ],
+  "top_three_mentions": {
+    "B01": 3,
+    "B06": 4,
+    "B11": 5,
+    "B02": 2,
+    "B04": 1,
+    "B14": 3,
+    "B15": 1,
+    "B08": 1,
+    "B13": 1,
+    "B05": 1,
+    "B17": 1,
+    "B19": 1
+  },
+  "source_files": [
+    "01-gamer-vote.json",
+    "02-mac-vote.json",
+    "03-teacher-vote.json",
+    "04-newcomer-vote.json",
+    "05-tinkerer-vote.json",
+    "06-parallel-vote.json",
+    "07-research-vote.json",
+    "08-office-vote.json"
+  ]
+}

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="3 3 42 42">
+<style>@media (prefers-color-scheme: dark) {.i { fill: #eef1f3; } .a { fill: #34d399; }}</style>
+<rect class="i" x="11" y="9" width="26" height="7" rx="3.5" fill="#221e1f" />
+<rect class="a" x="5" y="20.5" width="38" height="7" rx="3.5" fill="#10b981" />
+<rect class="i" x="11" y="32" width="26" height="7" rx="3.5" fill="#221e1f" />
+</svg>

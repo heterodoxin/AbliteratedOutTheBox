@@ -10,26 +10,26 @@ These checks do not establish refusal-removal rates, response quality, throughpu
 
 ## Build
 
-The build helper downloads a pinned copy of Strata, applies the integration patch, copies in the native hook, and builds Strata. It does not download model weights.
+This branch contains Strata itself, with the hook integrated directly into its native source. The build helper compiles this checkout. Strata fetches its pinned ggml tensor-library dependency when needed; no separate inference runtime or model weights are downloaded.
 
 ```bash
-python3.11 -m pip install -r strata/requirements.txt
+python3.11 -m pip install -r abliterate/requirements.txt
 
 # AMD / HIP: use your card's architecture.
-python3.11 strata/build.py --backend hip --arch gfx1201 --test -- -DSTRATA_MMQ_KQUANTS=OFF
+python3.11 abliterate/build.py --backend hip --arch gfx1201 --test -- -DSTRATA_MMQ_KQUANTS=OFF
 
 # NVIDIA / CUDA: use your card's compute capability.
-python3.11 strata/build.py --backend cuda --arch 89 --test
+python3.11 abliterate/build.py --backend cuda --arch 89 --test
 ```
 
-A C++ toolchain, CMake 3.24 or newer, and the selected GPU toolkit are required. The patched engine is written to `strata/.strata-src/build-abliterate/strata` (`strata.exe` on Windows).
+A C++ toolchain, CMake 3.24 or newer, and the selected GPU toolkit are required. The patched engine is written to `build-abliterate/strata` (`strata.exe` on Windows).
 
 ## Run
 
 Use a Strata-supported **Qwen3.8 / qwen4exp GGUF** with its tokenizer and chat template in the file:
 
 ```bash
-python3.11 strata/abliterate.py \
+python3.11 abliterate/abliterate.py \
   --model /path/to/model.gguf \
   --prompt "Explain how a transformer works" \
   --max-new-tokens 256
@@ -52,4 +52,6 @@ This first port supports one text sequence on one GPU through Strata's Qwen3.8 e
 
 The default performs 21 anchor prefills, a clean look-ahead, and a final answer prefill. An early end-of-generation token requires one additional gate prefill. This adds substantial work before the answer. No speed or model-quality improvement is claimed.
 
-See [the integration notes](strata/README.md) for source layout, protocol, and checks.
+Based on [Strata source revision `8183c6b`](https://github.com/Niko1221/Strata/tree/8183c6b67162340c09b67360860177c577a65f2e).
+
+See [the integration notes](abliterate/README.md) for source layout, protocol, and checks.

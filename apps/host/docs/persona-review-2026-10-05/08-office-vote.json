@@ -1,0 +1,36 @@
+{
+  "reviewer": "08",
+  "persona": "Regular workplace AI user",
+  "model": "gpt-6.1-sol",
+  "effort": "medium",
+  "votes": {
+    "B01": { "choice": "YES", "reason": "Remove repeated teaching while retaining useful hints and actual configuration state." },
+    "B02": { "choice": "CONTEXT", "reason": "Text capacity is my ordinary decision; custom batch stays discoverable without a second primary dial." },
+    "B03": { "choice": "MEMORY", "reason": "Fit answers the immediate setup question; deliberate speed disclosure avoids making demo rates the hero." },
+    "B04": { "choice": "YES", "reason": "Save, explicit restart and changed-state discard deserve priority over occasional preview and validation actions." },
+    "B05": { "choice": "YES", "reason": "Expert keeps operational facts and exact controls while descriptions remain deliberately accessible." },
+    "B06": { "choice": "UNIQUE", "reason": "One exact winner with profile chips removes duplication while keeping no-fit and different winners in view." },
+    "B07": { "choice": "YES", "reason": "Readable exact identities prevent selecting a different variant under a friendly model name." },
+    "B08": { "choice": "FIT", "reason": "Fit, working memory and download determine commitment; rates are available when I want to compare speed." },
+    "B09": { "choice": "YES", "reason": "Compact actionable no-fit states and shared winners avoid apparent duplicate choices or downloads." },
+    "B10": { "choice": "YES", "reason": "Daily use should begin with available files and remember my deliberate library choice." },
+    "B11": { "choice": "YES", "reason": "Aligned facts reveal differences with much less repeated instrumentation and preserve local evidence." },
+    "B12": { "choice": "FIVE", "reason": "A separately named review before download makes resource commitment predictable; tuning within it stays optional." },
+    "B13": { "choice": "RENAME", "reason": "Everyday work and Faster answers are clearer decision labels; technical names remain available." },
+    "B14": { "choice": "YES", "reason": "Detected capacity and exact download consequences are sufficient default facts before commitment." },
+    "B15": { "choice": "YES", "reason": "One truthful progress state with adjacent recovery consequences tells me what action remains possible." },
+    "B16": { "choice": "YES", "reason": "Successful readiness and Start chatting should end setup without another full memory panel." },
+    "B17": { "choice": "YES", "reason": "Global scope and known request blockers prevent surprising interruption of other workplace chats." },
+    "B18": { "choice": "YES", "reason": "One genuinely shared source badge reduces repetition without conflating memory estimates or mixed evidence." },
+    "B19": { "choice": "VISIBLE", "reason": "A short actual review-status line replaces vague tradeoff prose and distinguishes recommendation from task validation." },
+    "B20": { "choice": "YES", "reason": "Text samples with token amounts describe performance scope without promising file handling." }
+  },
+  "top_three": ["B19", "B11", "B14"],
+  "amendments": [
+    "B19 status wording should describe the actual reviewed scope: Tool review pending is preferable to a general Capability reviewed claim when metadata only covers tools. Specific task evidence belongs in Why this model; no office, XLSX, legal or confidentiality guarantees are implied.",
+    "For B12 retain the name Review setup for the third step rather than Tune, since download/configuration commitment is required while adjustment is optional.",
+    "Withdraw my round-one phrase Changes take effect after saving: use Changes stay in your draft until saved and retain the actual next-request versus next-load scope. Saving alone does not apply all engine settings.",
+    "B13 Tools and agents needs its short descriptor to explain reviewed tool capability and long prompts; it cannot imply trustworthy tool actions.",
+    "B20 should show tokens explicitly in the sample choices, not leave K looking like a file-size unit; retain the output allowance and file-support distinction in help."
+  ]
+}

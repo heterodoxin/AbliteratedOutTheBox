@@ -1,0 +1,333 @@
+{
+  "available": true,
+  "version": "v0.1.38",
+  "repo": "/Applications/Strata/engine",
+  "summary": "UI preview — simulated model state",
+  "error": null,
+  "catalog": {
+    "families": [
+      {
+        "family": "qwen",
+        "title": "Qwen3.8-Flash-Next",
+        "about": "the original model",
+        "experimental": false,
+        "images": true,
+        "sizes": [
+          {
+            "id": "q2_0",
+            "model": "Q2_0",
+            "about": "2-bit, the fastest",
+            "download_gb": 66.4,
+            "ram_needed_gb": 48,
+            "experts_gb": 34,
+            "on_this_pc": "does not fit",
+            "installed": false
+          },
+          {
+            "id": "iq2_xs",
+            "model": "IQ2_XS",
+            "about": "2-bit i-quant, a little better quality, close in speed",
+            "download_gb": 68,
+            "ram_needed_gb": 48,
+            "experts_gb": 35.5,
+            "on_this_pc": "does not fit",
+            "installed": false
+          },
+          {
+            "id": "iq3_xxs",
+            "model": "IQ3_XXS",
+            "about": "3-bit i-quant, better quality, slower (more CPU work per token)",
+            "download_gb": 75.8,
+            "ram_needed_gb": 60,
+            "experts_gb": 42.9,
+            "on_this_pc": "does not fit",
+            "installed": false
+          },
+          {
+            "id": "iq3_s",
+            "model": "IQ3_S",
+            "about": "3.5-bit i-quant, the best quality (matches the full model), the slowest; needs a 64 GB PC with little else running",
+            "download_gb": 83.6,
+            "ram_needed_gb": 62,
+            "experts_gb": 50.3,
+            "on_this_pc": "does not fit",
+            "installed": false
+          }
+        ]
+      },
+      {
+        "family": "swift",
+        "title": "Swift 1.5",
+        "about": "thinks much shorter (-63% thinking tokens, 1.8x sooner answers by its authors' numbers)",
+        "experimental": false,
+        "images": true,
+        "sizes": [
+          {
+            "id": "swift-iq2_xs",
+            "model": "IQ2_XS",
+            "about": "2-bit i-quant, a little better quality, close in speed",
+            "download_gb": 68,
+            "ram_needed_gb": 48,
+            "experts_gb": 35.5,
+            "on_this_pc": "does not fit",
+            "installed": false
+          },
+          {
+            "id": "swift-iq3_xxs",
+            "model": "IQ3_XXS",
+            "about": "3-bit i-quant, better quality, slower (more CPU work per token)",
+            "download_gb": 75.8,
+            "ram_needed_gb": 60,
+            "experts_gb": 42.9,
+            "on_this_pc": "does not fit",
+            "installed": false
+          }
+        ]
+      },
+      {
+        "family": "coder",
+        "title": "Qwen3.8-Flash-Next Coder",
+        "about": "half the experts (code, tools, images kept): needs ~32 GB of RAM, faster; weaker outside coding",
+        "experimental": false,
+        "images": true,
+        "sizes": [
+          {
+            "id": "coder-iq1_m",
+            "model": "IQ1_M",
+            "about": "the Coder's only size: half the experts, stored like IQ3_S (3.5 bits)",
+            "download_gb": 58.4,
+            "ram_needed_gb": 32,
+            "experts_gb": 23.4,
+            "on_this_pc": "does not fit",
+            "installed": false
+          }
+        ]
+      },
+      {
+        "family": "unsloth",
+        "title": "Qwen3.8-Flash-Next (Unsloth)",
+        "about": "4-bit, 111 GB download, most experts read from the SSD: slow (7-8.5 tokens/s on a 64 GB PC)",
+        "experimental": true,
+        "images": false,
+        "sizes": [
+          {
+            "id": "unsloth-ud-q4_k_xl",
+            "model": "UD-Q4_K_XL",
+            "about": "4-bit (Unsloth Dynamic), EXPERIMENTAL: the best quality, but most experts come from the SSD on a 64 GB PC (7-8.5 tokens/s measured)",
+            "download_gb": 111.3,
+            "ram_needed_gb": 48,
+            "experts_gb": 77,
+            "on_this_pc": "does not fit",
+            "installed": false
+          }
+        ]
+      }
+    ],
+    "contexts": [
+      8192,
+      32768,
+      65536,
+      131072,
+      262144,
+      393216,
+      524288
+    ],
+    "recommendation": {
+      "family": "qwen",
+      "model": "Q2_0",
+      "context": 32768
+    },
+    "context_note": "longer contexts need more VRAM (fewer experts fit on the GPU); past 262144 setup adds rope scaling (experimental)"
+  },
+  "fields": [
+    {
+      "id": "reasoning_budget_tokens",
+      "label": "Thinking token budget",
+      "group": "Responses",
+      "type": "number",
+      "min": 0,
+      "max": 1048576,
+      "hint": "Leave blank for the model default.",
+      "supported": true
+    },
+    {
+      "id": "fit_max_tokens",
+      "label": "Fit output to remaining context",
+      "group": "Responses",
+      "type": "boolean",
+      "hint": "Shortens the requested output cap when the prompt leaves less room.",
+      "supported": true
+    },
+    {
+      "id": "anthropic_thinking",
+      "label": "Anthropic thinking",
+      "group": "Responses",
+      "type": "enum",
+      "choices": [
+        "model",
+        "on_request"
+      ],
+      "hint": "Follow the model default or think only when requested.",
+      "supported": true
+    },
+    {
+      "id": "effort_position",
+      "label": "Reasoning effort position",
+      "group": "Responses",
+      "type": "enum",
+      "choices": [
+        "start",
+        "end"
+      ],
+      "supported": false
+    },
+    {
+      "id": "aliases",
+      "label": "API model aliases",
+      "group": "Serving",
+      "type": "array",
+      "hint": "Comma-separated names clients may use for this model.",
+      "supported": true
+    },
+    {
+      "id": "idle_unload_s",
+      "label": "Unload after idle seconds",
+      "group": "Serving",
+      "type": "number",
+      "min": 0,
+      "max": 86400,
+      "hint": "Zero keeps the model loaded.",
+      "supported": true
+    },
+    {
+      "id": "lazy_load",
+      "label": "Load on first request",
+      "group": "Serving",
+      "type": "boolean",
+      "supported": true
+    },
+    {
+      "id": "parallel",
+      "label": "Concurrent requests",
+      "group": "Serving",
+      "type": "number",
+      "min": 1,
+      "max": 8,
+      "hint": "More slots need more memory and can slow each response.",
+      "supported": false
+    },
+    {
+      "id": "engine_silence_s",
+      "label": "Engine stall timeout (seconds)",
+      "group": "Recovery",
+      "type": "number",
+      "min": 10,
+      "max": 3600,
+      "supported": true
+    },
+    {
+      "id": "api_monitor",
+      "label": "Keep API request metadata",
+      "group": "Recovery",
+      "type": "boolean",
+      "supported": true
+    },
+    {
+      "id": "layer_split",
+      "label": "Layer split",
+      "group": "GPU & memory",
+      "type": "string",
+      "hint": "auto, or increasing split points such as 18 or 16,32.",
+      "supported": true
+    },
+    {
+      "id": "gpu_order",
+      "label": "GPU order",
+      "group": "GPU & memory",
+      "type": "enum",
+      "choices": [
+        "auto",
+        "as_given"
+      ],
+      "supported": false
+    },
+    {
+      "id": "split_skip_if_fits",
+      "label": "Use one GPU when the model fits",
+      "group": "GPU & memory",
+      "type": "boolean",
+      "supported": true
+    },
+    {
+      "id": "vram_elastic",
+      "label": "Elastic GPU expert cache",
+      "group": "GPU & memory",
+      "type": "boolean",
+      "supported": false
+    },
+    {
+      "id": "vram_reserve_mib",
+      "label": "GPU memory for other apps (MiB)",
+      "group": "GPU & memory",
+      "type": "number",
+      "min": 0,
+      "max": 131072,
+      "hint": "Applied as --vram-reserve-mib when loading.",
+      "supported": true
+    },
+    {
+      "id": "vision_tokens",
+      "label": "Maximum image tokens",
+      "group": "Image reading",
+      "type": "number",
+      "min": 1,
+      "max": 16384,
+      "supported": true
+    },
+    {
+      "id": "vision_min_tokens",
+      "label": "Minimum image tokens",
+      "group": "Image reading",
+      "type": "number",
+      "min": 0,
+      "max": 16384,
+      "supported": true
+    },
+    {
+      "id": "mcp_timeout_s",
+      "label": "Tool timeout (seconds)",
+      "group": "Tools",
+      "type": "number",
+      "min": 1,
+      "max": 3600,
+      "supported": true
+    },
+    {
+      "id": "mcp_max_rounds",
+      "label": "Maximum tool rounds",
+      "group": "Tools",
+      "type": "number",
+      "min": 1,
+      "max": 100,
+      "supported": true
+    },
+    {
+      "id": "mcp_max_result_chars",
+      "label": "Maximum tool result characters",
+      "group": "Tools",
+      "type": "number",
+      "min": 100,
+      "max": 1000000,
+      "supported": true
+    }
+  ],
+  "capabilities": {
+    "updates": false,
+    "rollback": false,
+    "calibration": true,
+    "responses": true
+  },
+  "instances": [],
+  "jobs": [],
+  "defaultId": null
+}

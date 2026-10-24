@@ -1,0 +1,30 @@
+[package]
+name = "strata-desktop"
+version = "0.2.3"
+description = "Strata Desktop — local AI, tuned to one model."
+edition = "2021"
+rust-version = "1.77"
+license = "MIT"
+
+# Linux: the drop of a file on the window is read straight from the GTK drag signals (see hook_linux_drops in main.rs); the versions are the ones Tauri itself uses.
+[target.'cfg(target_os = "linux")'.dependencies]
+gtk = "0.18"
+webkit2gtk = "2.0"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-shell = "2"
+tauri-plugin-updater = "2"
+tauri-plugin-single-instance = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+panic = "abort"
+strip = true

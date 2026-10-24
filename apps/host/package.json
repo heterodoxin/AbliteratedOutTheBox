@@ -1,0 +1,50 @@
+{
+  "name": "strata",
+  "private": true,
+  "version": "0.2.3",
+  "type": "module",
+  "description": "Strata \u2014 local AI, tuned to one model. Web shell + engine host.",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "dev:web": "vite",
+    "dev:host": "node server/index.mjs",
+    "build": "vite build",
+    "serve": "node server/index.mjs --dist dist",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "sync:kit": "node scripts/sync-design-kit.mjs",
+    "shot": "node scripts/shoot.mjs",
+    "flow": "node scripts/flow.mjs",
+    "audit": "node scripts/audit-ui.mjs",
+    "contrast": "node scripts/contrast.mjs",
+    "motion": "node scripts/motion.mjs",
+    "check": "npm run typecheck && npm run audit && npm run contrast && npm run measure && npm run luminance",
+    "measure": "node scripts/measure.mjs",
+    "luminance": "node scripts/luminance.mjs",
+    "flows": "node scripts/flows.mjs",
+    "motion:budget": "node scripts/motionbudget.mjs",
+    "preview:ui": "node scripts/preview-ui.mjs",
+    "test": "node scripts/test.mjs"
+  },
+  "dependencies": {
+    "html-to-image": "^1.11.13",
+    "katex": "^0.19.0",
+    "pdfjs-dist": "^6.4.299",
+    "prismjs": "1.30.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.4",
+    "@types/prismjs": "1.26.6",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "playwright-core": "^1.63.0",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.7"
+  },
+  "engines": {
+    "node": ">=24.12.0"
+  }
+}

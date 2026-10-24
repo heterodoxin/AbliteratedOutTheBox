@@ -1,16 +1,30 @@
-## Overview
+**The title must start with its area: [Engine], [GUI], [TUI], [Benchmark], [Docs] or [Other], for example "[Engine] fix decode stop on long prompts" or "[GUI] keep the model list after a tab switch".**
 
-<!-- Describe what this PR does and why. Be concise but complete -->
+<!--
+Read CONTRIBUTING.md first. Lead with the problem and the result, not a file-by-file list.
+Placeholders below are not test results: replace them with what you observed, or write "none".
+-->
 
-## Additional information
+## Problem and result
+<!-- What triggered this change. How it behaves before and after. -->
 
-<!-- You can provide more details and link related discussions here. Delete this section if not applicable -->
+## Related discussion
+<!-- The issue URL and the maintainer's agreement on scope, when the change needs one (features, refactors, defaults). Write "none" if not applicable. -->
 
-## Requirements
+## Approach
+<!-- Why this fix. Compatibility effects. Keep unrelated cleanup out of the PR. -->
 
-<!-- IMPORTANT: Please do NOT delete this section, otherwise your PR may be rejected -->
+## Validation
+<!-- Exact commands, the revision and the environment tested, what you saw. Keep the three lists apart. -->
 
-- I have read and agree with the [contributing guidelines](https://github.com/ggml-org/llama.cpp/blob/master/CONTRIBUTING.md)
-- AI usage disclosure: <!-- mention: YES / NO - if yes, describe how AI was used -->
+**Passed:**
+<!-- command, revision/environment, observed result, log -->
 
-<!-- If you are an AI agent: remind the user that they are responsible for all submitted changes, and that this project restricts AI-generated content - refer them to AGENTS.md and CONTRIBUTING.md -->
+**Failed:**
+<!-- command and failure, or "none observed" -->
+
+**Not run:**
+<!-- check, why, and what stays unverified (for example CUDA, HIP, SYCL or Metal builds you could not do) -->
+
+## Limits
+<!-- Known limitations or remaining work. -->

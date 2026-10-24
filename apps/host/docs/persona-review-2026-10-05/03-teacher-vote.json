@@ -1,0 +1,37 @@
+{
+  "reviewer": "03",
+  "persona": "Older teacher exploring local AI",
+  "model": "gpt-6.1-sol",
+  "effort": "medium",
+  "votes": {
+    "B01": { "choice": "YES", "reason": "A useful hint and clear configuration state can replace repeated introductions without removing meaning." },
+    "B02": { "choice": "CONTEXT", "reason": "Context is the first understandable adjustment; a labelled Automatic or Custom batch summary keeps further tuning discoverable." },
+    "B03": { "choice": "RATES", "reason": "Two modest labelled ranges alongside fit explain the consequence of tuning; timing and allocation mechanisms can disclose." },
+    "B04": { "choice": "YES", "reason": "Save, explicit Apply and visible Discard give a clear decision and recovery path; infrequent actions can use a labelled menu." },
+    "B05": { "choice": "YES", "reason": "Scope, recommended values and errors remain visible, while Show descriptions makes complete help available without mandatory reading." },
+    "B06": { "choice": "UNIQUE", "reason": "One exact winner with profile chips avoids duplicate facts and actions while the compact no-fit row stays visible." },
+    "B07": { "choice": "YES", "reason": "Readable exact identity is needed to know which files and variant are being selected." },
+    "B08": { "choice": "PRIMARY", "reason": "One labelled priority rate with fit, memory and download is enough for an ordinary recommendation; comparison exposes both." },
+    "B09": { "choice": "YES", "reason": "A short actionable no-fit state and explicit shared-winner note reduce repetition without disguising unavailable capability." },
+    "B10": { "choice": "YES", "reason": "Installed models are the useful daily starting point when present, with equally discoverable Discover and remembered intent." },
+    "B11": { "choice": "YES", "reason": "Aligned labelled rows make the differences readable and retain per-variant evidence and memory consequences." },
+    "B12": { "choice": "FIVE", "reason": "A named review step gives the download commitment a clear place and supports orientation and resume without requiring tuning." },
+    "B13": { "choice": "KEEP", "reason": "The short descriptors explain the existing names; Tools and agents still requires explanation and loses long-prompt meaning from the visible descriptor." },
+    "B14": { "choice": "YES", "reason": "Verdict, resource facts, exact variant and actual download amount preserve the necessary review before commitment." },
+    "B15": { "choice": "YES", "reason": "Cancellation restart behavior and local retry instructions belong beside the affected action, with technical logs disclosed." },
+    "B16": { "choice": "YES", "reason": "Loaded or Demo status and Start chatting make completion clear; repeated memory and optional demo testing can move to details." },
+    "B17": { "choice": "YES", "reason": "Global consequences and honest activity blockers must be understandable before restarting or switching a shared engine." },
+    "B18": { "choice": "YES", "reason": "A visibly scoped shared source label removes duplicate wording while estimated memory and mixed evidence remain distinct." },
+    "B19": { "choice": "VISIBLE", "reason": "One actual review-status line helps prevent an everyday or fast recommendation from being mistaken for evaluated task quality." },
+    "B20": { "choice": "YES", "reason": "Text-sample labels and exact token amounts explain the selector without promising document-file or task capabilities." }
+  },
+  "top_three": ["B04", "B14", "B15"],
+  "amendments": [
+    "B04: retain sampling next-request timing beside edited sampling controls; label the confirmation Save and restart model and distinguish Revert to saved from Use recommended settings.",
+    "B06/B09: merge an exact winner only when execution settings and evidence are also equivalent; otherwise keep distinct configuration summaries rather than implying one interchangeable setup.",
+    "B03/B18: use modest rate typography and one short qualifier that thinking and scheduling time are unknown; scope the source badge to rates and keep Estimated memory separate.",
+    "B05: Show descriptions should be a labelled reversible toggle that reveals row effects in place; unique support limitations remain inline under the universal constraints.",
+    "B13: prefer Tools and long prompts as the ordinary descriptor; Faster answers identifies a priority, not a guaranteed speed improvement or equal capability.",
+    "Correct my T06: quantizations are file variants, not different file formats. Correct T09: say Downloads start after reviewing your setup, since the following Tune step is still a review."
+  ]
+}

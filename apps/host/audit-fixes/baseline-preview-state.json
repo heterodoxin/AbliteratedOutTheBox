@@ -1,0 +1,120 @@
+{
+  "version": 1,
+  "setup": {
+    "complete": true,
+    "flowVersion": 2,
+    "step": 4,
+    "history": [
+      {
+        "step": 1,
+        "at": "2026-10-05T18:00:10.057Z"
+      },
+      {
+        "step": 2,
+        "at": "2026-10-05T18:51:53.450Z"
+      },
+      {
+        "step": 2,
+        "at": "2026-10-05T18:51:53.886Z"
+      },
+      {
+        "step": 2,
+        "at": "2026-10-05T18:52:00.541Z"
+      },
+      {
+        "step": 2,
+        "at": "2026-10-05T18:52:02.205Z"
+      },
+      {
+        "step": 2,
+        "at": "2026-10-05T18:52:04.790Z"
+      },
+      {
+        "step": 2,
+        "at": "2026-10-05T18:52:05.651Z"
+      },
+      {
+        "step": 2,
+        "at": "2026-10-05T18:52:06.436Z"
+      },
+      {
+        "step": 2,
+        "at": "2026-10-05T18:52:07.787Z"
+      },
+      {
+        "step": 2,
+        "at": "2026-10-05T18:52:08.814Z"
+      },
+      {
+        "step": 2,
+        "at": "2026-10-05T18:52:09.420Z"
+      },
+      {
+        "step": 2,
+        "at": "2026-10-05T18:53:03.761Z"
+      },
+      {
+        "step": 3,
+        "at": "2026-10-05T18:55:28.371Z"
+      },
+      {
+        "step": 4,
+        "at": "2026-10-05T18:55:41.653Z"
+      }
+    ],
+    "dismissed": false,
+    "choices": {
+      "variantId": "qwen2.5-0.5b-q4km",
+      "contextLength": "32k",
+      "profile": "balanced",
+      "batch": 2048,
+      "batchAuto": true
+    },
+    "completedAt": "2026-10-05T19:15:31.747Z"
+  },
+  "installed": {
+    "qwen2.5-0.5b-q4km": {
+      "installedAt": "2026-10-05T18:55:39.914Z",
+      "simulated": true
+    }
+  },
+  "current": "qwen2.5-0.5b-q4km",
+  "loaded": "qwen2.5-0.5b-q4km",
+  "beginner": {
+    "priority": "balanced",
+    "contextLength": "32k",
+    "readImages": false,
+    "gpuIdle": "never"
+  },
+  "expert": {
+    "ctx.length": "32K",
+    "perf.batch": 2048,
+    "perf.threads": 2,
+    "ctx.kvMode": "INT8",
+    "gpu.layers": "Automatic"
+  },
+  "serving": {
+    "otherDevices": false,
+    "apiKey": null,
+    "pauseServing": true
+  },
+  "configExtra": {
+    "batchAutomatic": true
+  },
+  "tasks": [
+    {
+      "title": "new test task",
+      "prompt": "do this",
+      "frequency": "daily",
+      "at": "09:00",
+      "weekday": 1,
+      "timeZone": "Europe/Zagreb",
+      "enabled": true,
+      "id": "4d1dd4be-830d-438b-8d9a-58a20245f031",
+      "createdAt": "2026-10-06T20:00:52.943Z",
+      "status": "idle",
+      "archived": false,
+      "nextRunAt": "2026-10-07T07:00:00.000Z"
+    }
+  ]
+}

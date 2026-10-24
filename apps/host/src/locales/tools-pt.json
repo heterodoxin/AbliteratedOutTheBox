@@ -1,0 +1,6 @@
+{
+ "tl01": "Use um nome de servidor simples com até 32 caracteres: letras, números, hífens ou sublinhados.",
+ "tl02": "Estes servidores de ferramentas foram deixados de fora porque os nomes não são permitidos: {0}. Um nome pode ter até 32 letras, números, hífens ou sublinhados.",
+ "tl03": "Estes servidores de ferramentas foram deixados de fora porque não têm programa nem endereço web: {0}.",
+ "tl04": "Estes servidores de ferramentas foram deixados de fora porque outro tem quase o mesmo nome: {0}."
+}

@@ -1,0 +1,20 @@
+{
+  "name": "strata-desktop",
+  "productName": "Strata",
+  "version": "0.2.3",
+  "private": true,
+  "description": "Strata Desktop - local AI, tuned to one model.",
+  "scripts": {
+    "build:ui": "npm --prefix ../host run build",
+    "typecheck:ui": "npm --prefix ../host run typecheck",
+    "test:ui": "npm --prefix ../host test",
+    "tauri": "tauri",
+    "dev": "npm run build:ui && tauri dev",
+    "build": "npm run build:ui && tauri build",
+    "build:app": "npm run build:ui && tauri build --bundles app",
+    "dmg": "npm run build:ui && tauri build --bundles dmg"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "2.12.3"
+  }
+}

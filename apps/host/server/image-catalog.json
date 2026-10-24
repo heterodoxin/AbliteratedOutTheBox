@@ -1,0 +1,40 @@
+{
+  "family": "Qwen-Image-2.1-Turbo",
+  "repo": "unsloth/Qwen-Image-2.1-Turbo-GGUF",
+  "revision": "5d1f9f759ea877ae556cda88dbec958b62ad3809",
+  "checkedAt": "2026-10-12",
+  "variants": [
+    {
+      "id": "q4",
+      "label": "Q4",
+      "quant": "Q4_K_M",
+      "file": "qwen-image-2.1-turbo-Q4_K_M.gguf",
+      "bytes": 4199565120,
+      "sha256": "8940e8b522af886e0c0f5afddf720e82dd223cb9a43580b5f61c4d740452ac20"
+    },
+    {
+      "id": "q5",
+      "label": "Q5",
+      "quant": "Q5_K_M",
+      "file": "qwen-image-2.1-turbo-Q5_K_M.gguf",
+      "bytes": 5390223168,
+      "sha256": "37c51ff446f4db2e131a9d12c003f0c0e824c8b8ba4dcd8c6cd5753f13457f5f"
+    },
+    {
+      "id": "q6",
+      "label": "Q6",
+      "quant": "Q6_K",
+      "file": "qwen-image-2.1-turbo-Q6_K.gguf",
+      "bytes": 6271551296,
+      "sha256": "f4560fb47ad863ffed7e32737d3c42988c44bd0c459606777d7ffe2e895d0a70"
+    },
+    {
+      "id": "q8",
+      "label": "Q8",
+      "quant": "Q8_0",
+      "file": "qwen-image-2.1-turbo-Q8_0.gguf",
+      "bytes": 7640860480,
+      "sha256": "399d2ddc3636f36456e2f5bfa57187da4e38721bc046430317f42a9eab5b1712"
+    }
+  ]
+}

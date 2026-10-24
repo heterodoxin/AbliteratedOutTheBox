@@ -1,0 +1,8 @@
+# strata-sycl-dev + Intel pti-gpu unitrace (per-kernel Level Zero profiling). Build:
+#   docker build -t strata-sycl-dev:unitrace -f sycl/tools/Dockerfile.unitrace sycl/tools
+FROM strata-sycl-dev
+RUN . /opt/intel/oneapi/setvars.sh --force >/dev/null 2>&1; \
+    git clone --depth 1 https://github.com/intel/pti-gpu.git /opt/pti-gpu && \
+    cd /opt/pti-gpu/tools/unitrace && mkdir build && cd build && \
+    cmake -DCMAKE_BUILD_TYPE=Release .. >/dev/null && make -j"$(nproc)" >/dev/null 2>&1 && ./unitrace --version
+ENV PATH=/opt/pti-gpu/tools/unitrace/build:$PATH

@@ -1,22 +1,27 @@
-*.o
-*.a
-.cache/
-# Do not ignore .git directory, otherwise the reported build number will always be 0
-.github/
-.gitignore
-.vs/
-.vscode/
-.DS_Store
+# Keep the image to the source only: everything generated is re-created on
+# first start (inside the container or on the /data volume).
+.git
 
-build*/
+# local Python environment (rebuilt in the image)
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
 
-tools/ui/node_modules/
-
-models/*
-
-/llama-cli
-/llama-quantize
-
-arm_neon.h
-compile_commands.json
-Dockerfile
+# setup.py outputs and downloads (engine, packs, models, logs)
+/engine/
+/build/
+/build*/
+/dist/
+/packs/
+/mtp/
+/models/
+/Strata-data/
+third_party/llama.cpp/
+third_party/*.zip
+*.done
+*.log
+strata-*.json
+strata-*.txt
+run-*.sh
+run-*.bat

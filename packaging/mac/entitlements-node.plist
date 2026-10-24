@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!-- The entitlements for the bundled Node runtime (Contents/Resources/node/node), the only program in the app or the Terminal
+       archive that needs any. sign-and-notarize.sh gives every other Mach-O none.
+
+       com.apple.security.cs.allow-jit
+         V8 compiles JavaScript, regular expressions and WebAssembly to machine code at run time and writes it into memory mapped
+         with MAP_JIT. The hardened runtime refuses that mapping unless this is set. Measured on a Mac mini M4 (macOS 27.2) with
+         a hardened-runtime build of Node 24.12.0: without it node dies at start ("Fatal process out of memory: Failed to reserve
+         virtual memory for CodeRange"); with only this one, a 30-million-iteration JIT loop, a backtracking regexp and a
+         WebAssembly module run. The native addons of the Harness (koffi, node-pty, sharp, the system addon) load in a dry run, where
+         an ad-hoc signature has no Team ID and library validation is therefore switched off for the test; with the real Developer
+         ID they are checked for the same Team ID, which they share because sign-and-notarize.sh signs them all (it loads every one
+         of them in the signed node before it asks Apple anything).
+
+       Deliberately NOT here (Node's own release is signed with all of them, plus get-task-allow):
+         com.apple.security.cs.allow-unsigned-executable-memory   not needed, see above
+         com.apple.security.cs.disable-executable-page-protection not needed
+         com.apple.security.cs.allow-dyld-environment-variables   we never rely on DYLD_* variables
+         com.apple.security.get-task-allow                        debug builds only; Apple rejects it for notarisation
+         com.apple.security.cs.disable-library-validation
+            Library validation makes a hardened program load only libraries signed by Apple or by the same Team ID. Every addon and
+            library in these bundles is re-signed by sign-and-notarize.sh with the one Developer ID, so they match. Add this key
+            ONLY if a tester reports "code signature ... different Team IDs" when Strata loads a library that is not part of the
+            bundle (for example a native addon an MCP server installs into the user's folder and loads with this node).
+       -->
+  <key>com.apple.security.cs.allow-jit</key>
+  <true/>
+</dict>
+</plist>

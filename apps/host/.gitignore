@@ -1,0 +1,8 @@
+node_modules/
+.strata/
+.strata-ui-preview/
+.localhost-*/
+.shots/
+tmp/
+.env*
+.DS_Store

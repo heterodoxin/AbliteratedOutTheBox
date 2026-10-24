@@ -1,0 +1,39 @@
+STRATA FOR MAC - APP (Strata @APP_VERSION@)
+==========================================
+
+This is the Strata desktop app for Macs with Apple silicon (M1 or newer). The AI engine (it runs on the Mac's graphics processor through
+Metal) is already inside the app, so there is nothing to install for it and no engine to download. Only the AI model itself is
+downloaded (from Hugging Face), when you pick one.
+
+File:    @APPIMAGE@   (about @SIZE_GB:@APPIMAGE@@ GB)
+Checks:  sha256 @SHA256:@APPIMAGE@@
+         To check your copy, in the Terminal app:   shasum -a 256 @APPIMAGE@   - the long number must be the same.
+
+
+WHAT YOU NEED
+-------------
+* A Mac with Apple silicon (M1 or newer) and macOS 15 or newer (the engine needs macOS 15). Intel Macs are not supported.
+* Memory: 32 GB or more is best. The model list shows what fits your Mac.
+* Disk: about 1 GB for the app, plus 40 to 70 GB for each model you download.
+
+
+START IT
+--------
+1. Double-click @APPIMAGE@. A window opens with Strata and the Applications folder.
+2. Drag Strata onto Applications.
+3. Open Strata from Applications (or Launchpad). The first start takes a little longer, because the engine inside the app is copied
+   into your home folder. Then open the Models page, pick a model and press the install button. A model download is big; it carries
+   on where it stopped if it is interrupted.
+
+Closing the window stops Strata and its engine.
+
+Pictures: on by default. This Mac build reads them on the Mac's GPU (under a second for a small picture on an M4).
+
+
+@INCLUDE:common-gatekeeper-mac.txt@
+
+
+WHAT TO SEND BACK
+-----------------
+Open  Settings > Engine > Diagnostics > View logs > Save logs.  Send the saved file, plus a few words about what you did and what you saw
+(a photo of the screen is fine).

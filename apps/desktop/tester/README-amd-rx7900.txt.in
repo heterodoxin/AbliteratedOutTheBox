@@ -1,0 +1,98 @@
+STRATA @APP_VERSION@ FOR LINUX - TESTER BUILD FOR AMD RX 7000 (RDNA3) CARDS (RX 7900 XTX)
+=====================================================================
+
+This is a private test version of Strata for Linux with an AMD graphics card. Please keep it to yourself: it is not a public release.
+THIS BUILD IS FOR AMD RX 7000 (RDNA3) CARDS ONLY (RX 7900 XTX, RX 7900 XT, RX 7800 XT, RX 7700 XT, RX 7600; gfx1100 / gfx1101 / gfx1102). If your card is from another family the engine will not start and says
+so in one line; ask for the other build (the RX 9000 build: Strata-tester-linux-amd-rx9070.AppImage).
+
+You have two programs; try either or both:
+  1. The desktop app:   @APPIMAGE@   (about @SIZE_GB:@APPIMAGE@@ GB)
+  2. The terminal app:  Strata-Terminal-Linux-tester-amd-rx7900.zip   (about @SIZE_GB:Strata-Terminal-Linux-tester-amd-rx7900.zip@ GB)
+Each one carries its own AI engine, so there is no engine to download. Only the AI model itself is downloaded when you pick one.
+
+Checks (sha256; to check your copy type  sha256sum <file>  - the long number must be the same):
+  @APPIMAGE@   @SHA256:@APPIMAGE@@
+  Strata-Terminal-Linux-tester-amd-rx7900.zip   @SHA256:Strata-Terminal-Linux-tester-amd-rx7900.zip@
+
+
+WHAT YOU NEED
+-------------
+* Ubuntu 22.04 or newer, 64-bit.
+* An AMD RX 7000 (RDNA3) graphics card (RX 7900 XTX, RX 7900 XT, RX 7800 XT, RX 7700 XT, RX 7600; gfx1100 / gfx1101 / gfx1102). No ROCm and no extra driver to install: the engine brings its own ROCm libraries, and the AMD
+  kernel driver (amdgpu) is already part of the Linux kernel. To check that the kernel sees your card, type:   ls /dev/kfd /dev/dri
+  You should see /dev/kfd and a renderD128 line. If /dev/kfd is missing, tell us your kernel (uname -r) and what "lspci | grep -i vga" prints.
+* Your user must be in the groups "render" and "video". This is the one setting the engine needs. Type once:
+      sudo usermod -aG render,video $USER
+  then LOG OUT AND LOG IN AGAIN (or reboot). Check with the command   id   - it must list render and video. Without this the engine says
+  something like "No device of requested type available" or cannot open /dev/kfd.
+* 32 GB of RAM or more is best (the model list shows what fits your computer). The AI model's big parts live in your RAM; your card
+  holds the rest. Your RX 7900 XTX has 24 GB: the 32K or 64K context the app suggests is a good start.
+* Disk: about 3 GB for the program and engine, plus 40 to 70 GB for each model you download (a fast NVMe disk is best).
+
+
+THE DESKTOP APP (AppImage)
+--------------------------
+1. Save the file somewhere you can find it, for example your Downloads folder.
+2. Make it runnable: right-click > Properties > Permissions > "Allow executing file as program", or in a terminal:
+       chmod +x @APPIMAGE@
+3. Install FUSE 2 once, if your system does not have it (AppImages need it; Ubuntu 26.04 does not install it any more):
+       Ubuntu 22.04:  sudo apt install libfuse2        Ubuntu 24.04 and 26.04:  sudo apt install libfuse2t64
+   Without FUSE you can still run it with:   ./@APPIMAGE@ --appimage-extract-and-run
+4. Start it by double-click, or from a terminal (a terminal also shows messages if something goes wrong):
+       ./@APPIMAGE@
+   The very first start takes about a minute longer: the engine that came with the app is unpacked into ~/.local/share/strata.
+   Then open the Models page, pick a model and press the install button. A model download is big; it carries on where it stopped if it is interrupted.
+   Closing the window stops Strata and the engine. To stop a running Strata from a terminal:   ./@APPIMAGE@ --quit
+   For the assistant (chat that works on files and runs tools) choose a context of 32K or more when you load the model; a smaller context is too small for the assistant's instructions.
+
+@INCLUDE:common-troubleshoot.txt@
+
+Please tell us about the window: which Linux and desktop (for example "Ubuntu 24.04, GNOME, Wayland"), your graphics driver, and whether the Strata window showed up
+and worked: yes / opened in the browser instead / blank / closed by itself.
+
+
+THE TERMINAL APP (zip)
+----------------------
+      unzip Strata-Terminal-Linux-tester-amd-rx7900.zip
+      cd strata-tester-linux-amd-rx7900
+      sh install-tester.sh
+      strata launch
+It needs python3, curl and tar (normally present). Everything is explained in README-TESTER.md inside the zip (AI-SETUP.md is the same for an AI assistant:
+give it that file and it can do the setup for you). The installer starts a tiny web server on your own computer only and stops it again; nothing is sent anywhere.
+
+
+WHAT TO SEND BACK
+-----------------
+* The desktop app:  Settings > Engine > Diagnostics > View logs > Save logs. Send the saved file. If the window crashed or would not open, run
+  ./@APPIMAGE@ --save-logs  in a terminal instead and send the file it writes in your Downloads folder (it includes the crash log).
+* The terminal app: the output of   strata doctor   (and   uname -r ,  id ,  ls /dev/kfd /dev/dri ).
+* The speed: the tokens-per-second numbers. The app shows "generating - N tok/s" while it answers. In the terminal app,
+  with the server running:   strata bench run --url http://127.0.0.1:8080 --suite serving-smoke --repeat 2 --out ~/strata-bench-1
+  prints "output ... tok/s" lines; please send ~/strata-bench-1/results.json too.
+  A line like "model iq2_xs, 32K context, RX 7900 XTX: 40 tok/s" is perfect.
+* A few words about what you did and what you saw (a photo of the screen is fine).
+Please do not send API keys.
+
+
+WHAT WE TESTED AND WHAT WE DID NOT
+----------------------------------
+* NOT TESTED by us on any RDNA3 card (RX 7000 series): we have no such card. The engine and the libraries inside contain code for gfx1100, gfx1101 and
+  gfx1102 (we checked the files), but this packaged build has never run on real hardware. Earlier engines built from source were run by community
+  members on an RX 7900 XTX and an RX 7800 XT (see docs/AMD_HIP.md in the Strata repository), which is why we expect it to work. Expect problems; every
+  report helps. This is the most important thing to know.
+* The same program was tested on an RDNA4 card (AMD Radeon AI PRO R9700) under Ubuntu 24.04: it loads a model, answers, runs tool calls and stops cleanly.
+  The RDNA3 code is the same source compiled for your card.
+* NOT tested by us either: the app window on a real desktop (our test box has no screen).
+* Pictures (image input) are on by default. The picture reader runs on the processor (CPU) for a card under 24 GB and on the graphics card from 24 GB, so
+  your 24 GB RX 7900 XTX uses the card's reader (strata-vision-hip, for gfx1100 / gfx1101 / gfx1102) and a 20 GB RX 7900 XT or a 16 GB RX 7800 XT uses the CPU
+  reader. The card's reader compiles for RDNA3 but has never run on an RDNA3 card here (we ran it on an R9700, RDNA4). If it cannot start, Strata uses the
+  CPU reader by itself. You can switch it per model. Please tell us whether pictures worked.
+* Speed is not final; treat the numbers as a baseline.
+
+
+WHERE THINGS ARE (to remove Strata completely, delete the files and these folders)
+---------------------------------------------------------------------------------
+  ~/.strata                      settings, chats, prepared model files
+  ~/.local/share/strata          the unpacked engine and the terminal app, and logs/ (what the app printed, and a crash log if the window ever crashes)
+  ~/.local/bin/strata            the terminal app's command
+  ~/Documents/Strata             downloaded models (Models) and your work folder (Workspace)

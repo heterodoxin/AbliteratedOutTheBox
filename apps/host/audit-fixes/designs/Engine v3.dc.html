@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+@font-face{font-family:'GT Walsheim Pro';src:url('fonts/GTWalsheimPro-Regular.woff2') format('woff2');font-weight:400;font-display:swap;}
+@font-face{font-family:'GT Walsheim Pro';src:url('fonts/GTWalsheimPro-Medium.woff2') format('woff2');font-weight:500;font-display:swap;}
+@font-face{font-family:'GT Walsheim Pro';src:url('fonts/GTWalsheimPro-Bold.woff2') format('woff2');font-weight:700;font-display:swap;}
+@font-face{font-family:'GT Walsheim Pro';src:url('fonts/GTWalsheimPro-Black.woff2') format('woff2');font-weight:900;font-display:swap;}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:#f9fafb;}
+a{color:#0c8a60;text-decoration:none;}
+a:hover{text-decoration:underline;}
+input[type=range]{accent-color:#10b981;}
+input[type=number]::-webkit-inner-spin-button{opacity:.5;}
+@keyframes blink{50%{opacity:0}}
+</style>
+</helmet>
+<div style="min-height:100vh;background:#f9fafb;color:#221e1f;font-family:'GT Walsheim Pro',system-ui,sans-serif;-webkit-font-smoothing:antialiased;padding-bottom:120px;">
+
+  <header style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:16px 32px;background:#ffffff;border-bottom:1px solid #dee5ee;">
+    <div style="display:flex;flex-direction:column;gap:4px;">
+      <h1 style="margin:0;font-weight:700;font-size:24px;letter-spacing:-0.01em;">Engine</h1>
+      <span style="font-size:13px;color:#6f6f6f;">Qwen3.8-Flash-Next · tuned for this PC</span>
+    </div>
+  </header>
+
+  <div style="{{ modeBarWidth }}margin:0 auto;padding:24px 28px 0;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+    <div style="display:flex;gap:4px;padding:4px;background:#ffffff;border:1px solid #dee5ee;border-radius:16px;box-shadow:0 1px 2px rgba(0,0,0,.04);">
+      <button onClick="{{ toSimple }}" style="{{ modeSimpleStyle }}display:flex;align-items:center;gap:8px;height:40px;padding:0 18px;border:0;border-radius:12px;font:700 14px/1 'GT Walsheim Pro',sans-serif;cursor:pointer;"><span style="display:inline-block;width:17px;height:17px;background:currentColor;mask:url(icons/gauge.svg) center/contain no-repeat;"></span>Simple</button>
+      <button onClick="{{ toExpert }}" style="{{ modeExpertStyle }}display:flex;align-items:center;gap:8px;height:40px;padding:0 18px;border:0;border-radius:12px;font:700 14px/1 'GT Walsheim Pro',sans-serif;cursor:pointer;"><span style="display:inline-block;width:17px;height:17px;background:currentColor;mask:url(icons/settings.svg) center/contain no-repeat;"></span>Expert</button>
+    </div>
+    <span style="font-size:14px;color:#6f6f6f;">{{ modeHint }}</span>
+  </div>
+
+  <!-- SIMPLE -->
+  <sc-if value="{{ isSimple }}" hint-placeholder-val="{{ true }}">
+  <main style="max-width:1200px;margin:0 auto;padding:20px 28px 0;display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start;">
+    <div style="flex:1.45 1 520px;min-width:0;display:flex;flex-direction:column;gap:20px;">
+      <section style="background:#ffffff;border:1px solid #dee5ee;border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:18px;box-shadow:0 4px 4px rgba(0,0,0,.03),0 1px 2px rgba(0,0,0,.04);">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+          <div style="display:flex;flex-direction:column;gap:4px;">
+            <h2 style="margin:0;font-weight:700;font-size:20px;">What will you mostly use it for?</h2>
+            <span style="font-size:14px;color:#6f6f6f;">Strata sets everything else up for you. You can change it any time.</span>
+          </div>
+          <button onClick="{{ startTune }}" style="display:flex;align-items:center;gap:8px;height:40px;padding:0 16px;border:1.5px solid #dee5ee;border-radius:14px;background:#ffffff;color:#221e1f;font:700 14px 'GT Walsheim Pro',sans-serif;cursor:pointer;" style-hover="background:#f7f7f7;"><span style="display:inline-block;width:18px;height:18px;background:#2F384C;mask:url(icons/gauge.svg) center/contain no-repeat;"></span>Auto-tune for my PC</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;">
+          <sc-for list="{{ goals }}" as="g" hint-placeholder-count="3">
+            <button onClick="{{ g.pick }}" style="{{ g.cardStyle }}display:flex;flex-direction:column;align-items:flex-start;gap:12px;padding:16px;border-radius:16px;text-align:left;cursor:pointer;font-family:'GT Walsheim Pro',sans-serif;transition:border-color 160ms,background 160ms;">
+              <span style="{{ g.iconWrap }}display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:12px;"><span style="{{ g.iconStyle }}display:inline-block;width:22px;height:22px;"></span></span>
+              <span style="display:flex;flex-direction:column;gap:3px;">
+                <span style="font-weight:700;font-size:15px;color:#221e1f;">{{ g.title }}</span>
+                <span style="font-size:13px;line-height:1.4;color:#6f6f6f;">{{ g.sub }}</span>
+              </span>
+            </button>
+          </sc-for>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;">
+            <sc-for list="{{ headroom }}" as="h" hint-placeholder-count="2">
+              <button onClick="{{ h.pick }}" style="{{ h.cardStyle }}display:flex;align-items:flex-start;gap:14px;padding:16px;border-radius:16px;text-align:left;cursor:pointer;font-family:'GT Walsheim Pro',sans-serif;transition:border-color 160ms,background 160ms;">
+                <span style="{{ h.radio }}flex:none;width:20px;height:20px;margin-top:2px;border-radius:50%;box-sizing:border-box;transition:border 160ms;"></span>
+                <span style="flex:1;display:flex;flex-direction:column;gap:4px;">
+                  <span style="display:flex;align-items:center;gap:8px;"><span style="{{ h.iconStyle }}display:inline-block;width:18px;height:18px;"></span><span style="font-weight:700;font-size:15px;color:#221e1f;">{{ h.title }}</span></span>
+                  <span style="font-size:13px;line-height:1.45;color:#6f6f6f;">{{ h.sub }}</span>
+                  <span style="font-size:12px;font-weight:500;color:#303030;font-variant-numeric:tabular-nums;">{{ h.stat }}</span>
+                </span>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+
+      <section style="background:#ffffff;border:1px solid #dee5ee;border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:20px;box-shadow:0 4px 4px rgba(0,0,0,.03),0 1px 2px rgba(0,0,0,.04);">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;">
+          <div style="display:flex;flex-direction:column;gap:4px;">
+            <h2 style="margin:0;font-weight:700;font-size:20px;">How much it can remember</h2>
+            <span style="font-size:14px;color:#6f6f6f;">Everything in one chat: your messages, its replies and any files you add.</span>
+          </div>
+          <sc-if value="{{ ctxNotRec }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ resetCtx }}" style="border:0;background:transparent;color:#0c8a60;font:500 13px 'GT Walsheim Pro',sans-serif;cursor:pointer;white-space:nowrap;">Use recommended</button>
+          </sc-if>
+        </div>
+        <div style="display:flex;align-items:flex-end;gap:14px;">
+          <span style="font-weight:900;font-size:44px;line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;">≈ {{ pages }}</span>
+          <span style="font-weight:500;font-size:18px;color:#303030;padding-bottom:4px;">pages</span>
+          <span style="flex:1;"></span>
+          <span style="font-size:13px;color:#6f6f6f;padding-bottom:6px;font-variant-numeric:tabular-nums;">{{ ctxLabel }} tokens</span>
+          <sc-if value="{{ ctxIsRec }}" hint-placeholder-val="{{ true }}">
+            <span style="display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:999px;background:#ecfdf5;color:#0c8a60;font-size:12px;font-weight:700;margin-bottom:4px;">Recommended</span>
+          </sc-if>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <input type="range" min="0" max="8" step="1" value="{{ ctxIdx }}" onChange="{{ setCtxIdx }}" style="width:100%;height:24px;cursor:pointer;"/>
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:#6f6f6f;font-variant-numeric:tabular-nums;">
+            <span>4K</span><span>8K</span><span>16K</span><span>32K</span><span>64K</span><span>128K</span><span>256K</span><span>512K</span><span>1M</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:#303030;">
+            <span>A note</span><span>A report</span><span>A book</span><span>A bookshelf</span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;background:#f7f7f7;font-size:14px;line-height:1.45;color:#303030;">
+          <span style="display:inline-block;flex:none;width:18px;height:18px;background:#2F384C;mask:url(icons/info.svg) center/contain no-repeat;"></span>{{ ctxHint }}
+        </div>
+      </section>
+
+
+    </div>
+
+    <aside style="flex:1 1 320px;min-width:300px;position:sticky;top:20px;display:flex;flex-direction:column;gap:16px;">
+      <section style="background:#ffffff;border:1px solid #dee5ee;border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:16px;box-shadow:0 4px 4px rgba(0,0,0,.03),0 1px 2px rgba(0,0,0,.04);">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+          <h2 style="margin:0;font-weight:700;font-size:18px;">How it will feel</h2>
+          <span style="font-size:12px;font-weight:500;color:#6f6f6f;">{{ previewTag }}</span>
+        </div>
+        <div style="min-height:132px;padding:14px 16px;border-radius:16px 16px 16px 6px;background:#f9fafb;border:1px solid #eeeeee;font-size:14px;line-height:1.6;color:#303030;">{{ streamText }}<span style="display:inline-block;width:7px;height:15px;margin-left:2px;vertical-align:-2px;background:#10b981;border-radius:2px;animation:blink 1s steps(1) infinite;"></span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div style="display:flex;flex-direction:column;gap:6px;padding:14px;border-radius:14px;background:#f7f7f7;">
+            <span style="font-size:12px;font-weight:500;color:#6f6f6f;">Writes</span>
+            <span style="font-weight:900;font-size:24px;line-height:1;font-variant-numeric:tabular-nums;">{{ genTokS }} <span style="font-weight:500;font-size:13px;color:#6f6f6f;">tok/s</span></span>
+            <span style="font-size:12px;color:#6f6f6f;font-variant-numeric:tabular-nums;">{{ wps }} words per second · {{ genVs }}</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;padding:14px;border-radius:14px;background:#f7f7f7;">
+            <span style="font-size:12px;font-weight:500;color:#6f6f6f;">Reads</span>
+            <span style="font-weight:900;font-size:24px;line-height:1;font-variant-numeric:tabular-nums;">{{ readTok }} <span style="font-weight:500;font-size:13px;color:#6f6f6f;">tok/s</span></span>
+            <span style="font-size:12px;color:#6f6f6f;font-variant-numeric:tabular-nums;">10-page doc in {{ readSec }} sec</span>
+          </div>
+        </div>
+      </section>
+      <section style="background:#ffffff;border:1px solid #dee5ee;border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:18px;box-shadow:0 4px 4px rgba(0,0,0,.03),0 1px 2px rgba(0,0,0,.04);">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span style="display:flex;align-items:center;justify-content:center;flex:none;width:44px;height:44px;border-radius:14px;background:#f7f7f7;border:1px solid #eeeeee;"><span style="display:inline-block;width:24px;height:24px;background:#2F384C;mask:url(icons/gpu.svg) center/contain no-repeat;"></span></span>
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;">
+            <h2 style="margin:0;font-weight:700;font-size:17px;">Graphics memory</h2>
+            <span style="font-size:13px;color:#6f6f6f;">RTX 4070 · 12 GB VRAM</span>
+          </div>
+          <span style="{{ fitChip }}display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;"><span style="width:6px;height:6px;border-radius:50%;background:currentColor;"></span>{{ fitLabel }}</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;">
+            <span style="display:flex;align-items:baseline;gap:6px;"><span style="font-weight:900;font-size:30px;line-height:1;letter-spacing:-0.01em;font-variant-numeric:tabular-nums;">{{ usedGb }}</span><span style="font-size:14px;font-weight:500;color:#6f6f6f;">GB used of 12</span></span>
+            <span style="font-size:13px;font-weight:500;color:#303030;font-variant-numeric:tabular-nums;">{{ mFree }} GB free</span>
+          </div>
+          <div style="display:flex;gap:3px;height:12px;padding:2px;border-radius:999px;background:#eef1f4;">
+            <div style="{{ barModel }}height:100%;border-radius:999px;background:#2F384C;transition:width 260ms;"></div>
+            <div style="{{ barCtx }}height:100%;border-radius:999px;background:#10b981;transition:width 260ms;"></div>
+            <div style="{{ barWork }}height:100%;border-radius:999px;background:#0f97ff;transition:width 260ms;"></div>
+            <div style="{{ barOver }}height:100%;border-radius:999px;background:repeating-linear-gradient(45deg,#e0283f 0 4px,#f37a89 4px 8px);transition:width 260ms;"></div>
+            <div style="flex:1;"></div>
+            <div style="{{ barReserve }}height:100%;border-radius:999px;background:repeating-linear-gradient(45deg,#c9d1db 0 3px,#e3e8ee 3px 6px);transition:width 260ms;"></div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;font-size:13px;color:#303030;font-variant-numeric:tabular-nums;">
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid #eeeeee;"><span style="width:10px;height:10px;border-radius:3px;background:#2F384C;"></span><span style="flex:1;">Model</span><span style="font-weight:700;">{{ mModel }} GB</span></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid #eeeeee;"><span style="width:10px;height:10px;border-radius:3px;background:#10b981;"></span><span style="flex:1;">Chat memory</span><span style="font-weight:700;">{{ mCtx }} GB</span></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid #eeeeee;"><span style="width:10px;height:10px;border-radius:3px;background:#0f97ff;"></span><span style="flex:1;">Working space</span><span style="font-weight:700;">{{ mWork }} GB</span></div>
+          <sc-if value="{{ showReserve }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid #eeeeee;"><span style="width:10px;height:10px;border-radius:3px;background:repeating-linear-gradient(45deg,#c9d1db 0 3px,#e3e8ee 3px 6px);"></span><span style="flex:1;">Kept for your apps</span><span style="font-weight:700;">{{ mReserve }} GB</span></div>
+          </sc-if>
+        </div>
+        <div style="{{ fitBox }}display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:14px;font-size:13px;line-height:1.45;">
+          <span style="display:inline-block;flex:none;width:16px;height:16px;margin-top:1px;background:currentColor;mask:url(icons/info.svg) center/contain no-repeat;"></span>{{ fitHint }}
+        </div>
+      </section>
+    </aside>
+  </main>
+  </sc-if>
+
+  <!-- EXPERT -->
+  <sc-if value="{{ isExpert }}" hint-placeholder-val="{{ false }}">
+  <main style="max-width:1360px;margin:0 auto;padding:20px 28px 0;display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start;">
+
+    <aside style="flex:1 1 200px;max-width:260px;min-width:200px;display:flex;flex-direction:column;gap:10px;">
+      <span style="font-weight:500;font-size:12px;letter-spacing:0.06em;text-transform:uppercase;color:#6f6f6f;padding:0 4px;">Presets</span>
+      <sc-for list="{{ presets }}" as="p" hint-placeholder-count="5">
+        <div onClick="{{ p.load }}" style="{{ p.style }}position:relative;display:flex;flex-direction:column;gap:3px;padding:12px 14px;border-radius:14px;cursor:pointer;transition:background 140ms,border-color 140ms;">
+          <span style="display:flex;align-items:center;gap:8px;padding-right:22px;"><span style="font-weight:700;font-size:14px;color:#221e1f;">{{ p.name }}</span><sc-if value="{{ p.active }}" hint-placeholder-val="{{ false }}"><span style="width:7px;height:7px;border-radius:50%;background:#10b981;"></span></sc-if></span>
+          <span style="font-family:ui-monospace,Consolas,monospace;font-size:11px;line-height:1.5;color:#6f6f6f;">{{ p.sub }}</span>
+          <sc-if value="{{ p.custom }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ p.remove }}" title="Delete preset" style="position:absolute;top:8px;right:8px;display:flex;align-items:center;justify-content:center;width:24px;height:24px;border:0;border-radius:7px;background:transparent;cursor:pointer;" style-hover="background:#fdecee;"><span style="display:inline-block;width:14px;height:14px;background:#6f6f6f;mask:url(icons/trash.svg) center/contain no-repeat;"></span></button>
+          </sc-if>
+        </div>
+      </sc-for>
+      <sc-if value="{{ naming }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:14px;background:#ffffff;border:1.5px solid #405de6;">
+          <input value="{{ nameDraft }}" onChange="{{ onName }}" onKeyDown="{{ onNameKey }}" placeholder="Preset name" autofocus="" style="height:36px;padding:0 10px;border-radius:10px;border:1px solid #dee5ee;font:500 14px 'GT Walsheim Pro',sans-serif;color:#221e1f;outline:none;"/>
+          <div style="display:flex;gap:6px;">
+            <button onClick="{{ cancelName }}" style="flex:1;height:32px;border:1px solid #dee5ee;border-radius:10px;background:#ffffff;font:700 13px 'GT Walsheim Pro',sans-serif;cursor:pointer;">Cancel</button>
+            <button onClick="{{ savePreset }}" style="flex:1;height:32px;border:0;border-radius:10px;background:#10b981;color:#ffffff;font:700 13px 'GT Walsheim Pro',sans-serif;cursor:pointer;">Save</button>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ notNaming }}" hint-placeholder-val="{{ true }}">
+        <button onClick="{{ startName }}" style="display:flex;align-items:center;justify-content:center;gap:8px;height:40px;border:1.5px dashed #dee5ee;border-radius:14px;background:transparent;color:#303030;font:700 13px 'GT Walsheim Pro',sans-serif;cursor:pointer;" style-hover="border-color:#10b981;color:#0c8a60;"><span style="display:inline-block;width:16px;height:16px;background:currentColor;mask:url(icons/new-chat.svg) center/contain no-repeat;"></span>Save current as preset</button>
+      </sc-if>
+    </aside>
+
+    <section style="flex:999 1 520px;display:flex;flex-direction:column;gap:16px;min-width:0;">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <div style="display:flex;gap:4px;padding:4px;background:#f7f7f7;border:1px solid #dee5ee;border-radius:14px;">
+          <button onClick="{{ toParams }}" style="{{ tabParamsStyle }}display:flex;align-items:center;gap:8px;height:34px;padding:0 14px;border:0;border-radius:10px;font:700 14px/1 'GT Walsheim Pro',sans-serif;cursor:pointer;"><span style="display:inline-block;width:16px;height:16px;background:currentColor;mask:url(icons/settings.svg) center/contain no-repeat;"></span>Parameters</button>
+          <button onClick="{{ toRaw }}" style="{{ tabRawStyle }}display:flex;align-items:center;gap:8px;height:34px;padding:0 14px;border:0;border-radius:10px;font:700 14px/1 'GT Walsheim Pro',sans-serif;cursor:pointer;"><span style="display:inline-block;width:16px;height:16px;background:currentColor;mask:url(icons/copy.svg) center/contain no-repeat;"></span>Raw config</button>
+        </div>
+        <span style="flex:1;"></span>
+        <code style="font-family:ui-monospace,Consolas,monospace;font-size:12px;color:#6f6f6f;">~/.strata/engine.json</code>
+      </div>
+
+      <sc-if value="{{ tabParams }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:220px;display:flex;align-items:center;gap:8px;height:42px;padding:0 12px;border-radius:14px;border:1.5px solid #dee5ee;background:#ffffff;">
+              <span style="display:inline-block;width:16px;height:16px;background:#6f6f6f;mask:url(icons/layers.svg) center/contain no-repeat;"></span>
+              <input value="{{ q }}" onChange="{{ onQ }}" placeholder="Search name or key, e.g. kv or sample.top" style="flex:1;border:0;outline:none;background:transparent;font:400 14px 'GT Walsheim Pro',sans-serif;color:#221e1f;"/>
+            </div>
+            <button onClick="{{ toggleChanged }}" style="{{ changedBtnStyle }}display:flex;align-items:center;gap:8px;height:42px;padding:0 14px;border-radius:14px;font:700 13px 'GT Walsheim Pro',sans-serif;cursor:pointer;">Unsaved only · {{ unsavedN }}</button>
+            <button onClick="{{ toggleDesc }}" style="{{ descBtnStyle }}display:flex;align-items:center;gap:8px;height:42px;padding:0 14px;border-radius:14px;font:700 13px 'GT Walsheim Pro',sans-serif;cursor:pointer;">Descriptions</button>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <sc-for list="{{ groupChips }}" as="gc" hint-placeholder-count="7">
+              <button onClick="{{ gc.pick }}" style="{{ gc.style }}height:30px;padding:0 12px;border-radius:999px;font:500 13px 'GT Walsheim Pro',sans-serif;cursor:pointer;">{{ gc.label }}</button>
+            </sc-for>
+          </div>
+
+          <sc-for list="{{ groups }}" as="grp" hint-placeholder-count="3">
+            <div style="display:flex;flex-direction:column;background:#ffffff;border:1px solid #dee5ee;border-radius:20px;padding:8px;box-shadow:0 4px 4px rgba(0,0,0,.03),0 1px 2px rgba(0,0,0,.04);">
+              <div style="display:flex;align-items:baseline;justify-content:space-between;padding:12px 16px 8px;">
+                <span style="font-weight:700;font-size:16px;">{{ grp.title }}</span>
+                <span style="font-size:12px;color:#6f6f6f;">{{ grp.count }}</span>
+              </div>
+              <sc-for list="{{ grp.rows }}" as="r" hint-placeholder-count="3">
+                <div style="{{ r.rowStyle }}display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;padding:12px 16px;border-radius:14px;">
+                  <div style="flex:1 1 240px;display:flex;flex-direction:column;gap:4px;min-width:0;">
+                    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                      <span style="font-weight:700;font-size:14px;">{{ r.label }}</span>
+                      <code style="font-family:ui-monospace,Consolas,monospace;font-size:12px;color:#6f6f6f;">{{ r.key }}</code>
+                      <sc-if value="{{ r.unsaved }}" hint-placeholder-val="{{ false }}"><span style="display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:999px;background:#fff6e0;color:#8a5a00;font-size:11px;font-weight:700;">Unsaved</span></sc-if>
+                    </div>
+                    <span style="font-size:12px;color:#6f6f6f;">{{ r.meta }}</span>
+                    <sc-if value="{{ r.showDesc }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;line-height:1.45;color:#303030;">{{ r.desc }}</span></sc-if>
+                  </div>
+                  <div style="flex:0 1 auto;margin-left:auto;display:flex;align-items:center;gap:6px;">
+                    <sc-if value="{{ r.isSelect }}" hint-placeholder-val="{{ true }}">
+                      <select value="{{ r.value }}" onChange="{{ r.onSelect }}" style="width:min(190px,100%);height:40px;padding:0 10px;border-radius:12px;border:1.5px solid #dee5ee;background:#ffffff;color:#221e1f;font:500 14px 'GT Walsheim Pro',sans-serif;cursor:pointer;">
+                        <sc-for list="{{ r.options }}" as="o" hint-placeholder-count="3"><option value="{{ o.v }}">{{ o.l }}</option></sc-for>
+                      </select>
+                    </sc-if>
+                    <sc-if value="{{ r.isNumber }}" hint-placeholder-val="{{ false }}">
+                      <div style="display:flex;align-items:center;gap:10px;width:min(190px,100%);">
+                        <input type="range" min="{{ r.min }}" max="{{ r.max }}" step="{{ r.step }}" value="{{ r.value }}" onChange="{{ r.onNumber }}" style="flex:1;min-width:0;"/>
+                        <input type="number" min="{{ r.min }}" max="{{ r.max }}" step="{{ r.step }}" value="{{ r.value }}" onChange="{{ r.onNumber }}" style="width:72px;height:40px;padding:0 8px;border-radius:12px;border:1.5px solid #dee5ee;background:#ffffff;color:#221e1f;font:500 14px ui-monospace,Consolas,monospace;text-align:right;"/>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ r.isBool }}" hint-placeholder-val="{{ false }}">
+                      <div style="display:flex;align-items:center;justify-content:flex-end;gap:10px;width:min(190px,100%);">
+                        <span style="font-size:13px;color:#6f6f6f;">{{ r.boolLabel }}</span>
+                        <button onClick="{{ r.onToggle }}" role="switch" style="{{ r.track }}position:relative;flex:none;width:42px;height:26px;border-radius:999px;border:0;cursor:pointer;padding:0;transition:background 160ms;"><span style="{{ r.knob }}position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#ffffff;box-shadow:0 1px 2px rgba(0,0,0,.2);transition:transform 160ms;"></span></button>
+                      </div>
+                    </sc-if>
+                    <button onClick="{{ r.revert }}" title="Back to saved value" style="{{ r.revertStyle }}width:56px;height:32px;border:0;border-radius:9px;background:transparent;color:#0c8a60;font:700 13px 'GT Walsheim Pro',sans-serif;cursor:pointer;" style-hover="background:#ecfdf5;">Revert</button>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-for>
+          <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:40px;text-align:center;font-size:14px;color:#6f6f6f;background:#ffffff;border:1px dashed #dee5ee;border-radius:20px;">No parameters match. Try another word, or clear the filters.</div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ tabRaw }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span style="{{ rawChip }}display:inline-flex;align-items:center;gap:8px;height:30px;padding:0 12px;border-radius:999px;font-size:12px;font-weight:700;"><span style="width:6px;height:6px;border-radius:50%;background:currentColor;"></span>{{ rawStatus }}</span>
+            <span style="flex:1;"></span>
+            <button onClick="{{ rawFormat }}" style="height:36px;padding:0 14px;border:1.5px solid #dee5ee;border-radius:12px;background:#ffffff;font:700 13px 'GT Walsheim Pro',sans-serif;cursor:pointer;" style-hover="background:#f7f7f7;">Format</button>
+            <button onClick="{{ rawCopy }}" style="height:36px;padding:0 14px;border:1.5px solid #dee5ee;border-radius:12px;background:#ffffff;font:700 13px 'GT Walsheim Pro',sans-serif;cursor:pointer;" style-hover="background:#f7f7f7;">{{ copyLabel }}</button>
+            <button onClick="{{ rawImport }}" style="height:36px;padding:0 14px;border:1.5px solid #dee5ee;border-radius:12px;background:#ffffff;font:700 13px 'GT Walsheim Pro',sans-serif;cursor:pointer;" style-hover="background:#f7f7f7;">Import</button>
+            <button onClick="{{ rawExport }}" style="height:36px;padding:0 14px;border:1.5px solid #dee5ee;border-radius:12px;background:#ffffff;font:700 13px 'GT Walsheim Pro',sans-serif;cursor:pointer;" style-hover="background:#f7f7f7;">Export</button>
+            <input type="file" accept=".json,application/json" ref="{{ fileRef }}" onChange="{{ onFile }}" style="display:none;"/>
+          </div>
+          <div style="display:flex;max-height:620px;overflow:auto;background:#1b1f23;border-radius:20px;border:1.5px solid #1b1f23;">
+            <pre style="margin:0;padding:16px 10px 16px 16px;text-align:right;color:#5d6670;font:400 13px/1.7 ui-monospace,Consolas,monospace;user-select:none;border-right:1px solid rgba(255,255,255,.06);">{{ gutter }}</pre>
+            <textarea value="{{ rawValue }}" onChange="{{ onRaw }}" rows="{{ rawRows }}" spellcheck="false" style="flex:1;min-width:0;margin:0;padding:16px;border:0;outline:none;resize:none;overflow:hidden;background:transparent;color:#e6e9ec;font:400 13px/1.7 ui-monospace,Consolas,monospace;white-space:pre;tab-size:2;min-width:360px;"></textarea>
+          </div>
+          <sc-if value="{{ rawHasMsg }}" hint-placeholder-val="{{ false }}">
+            <div style="{{ rawMsgStyle }}display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:14px;font-size:13px;line-height:1.5;">
+              <span style="{{ rawMsgIcon }}display:inline-block;flex:none;width:18px;height:18px;margin-top:1px;"></span>
+              <span style="font-family:ui-monospace,Consolas,monospace;">{{ rawMsg }}</span>
+            </div>
+          </sc-if>
+          <span style="font-size:12px;color:#6f6f6f;">Edits apply to the draft as you type, as long as the JSON is valid. Unknown keys are ignored. The Parameters tab stays in sync.</span>
+        </div>
+      </sc-if>
+    </section>
+
+    <aside style="flex:1 1 280px;min-width:260px;display:flex;flex-direction:column;gap:14px;">
+      <section style="background:#ffffff;border:1px solid #dee5ee;border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:14px;box-shadow:0 4px 4px rgba(0,0,0,.03),0 1px 2px rgba(0,0,0,.04);">
+        <div style="display:flex;align-items:center;justify-content:space-between;"><h2 style="margin:0;font-weight:700;font-size:16px;">Live estimate</h2><span style="font-size:12px;color:#6f6f6f;">{{ previewTag }}</span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div style="display:flex;flex-direction:column;gap:5px;padding:12px;border-radius:12px;background:#f7f7f7;"><span style="font-size:11px;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;color:#6f6f6f;">Decode</span><span style="font-weight:900;font-size:22px;line-height:1;font-variant-numeric:tabular-nums;">{{ genTok }}</span><span style="font-size:11px;color:#6f6f6f;font-variant-numeric:tabular-nums;">tok/s · {{ genPct }}</span></div>
+          <div style="display:flex;flex-direction:column;gap:5px;padding:12px;border-radius:12px;background:#f7f7f7;"><span style="font-size:11px;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;color:#6f6f6f;">Prefill</span><span style="font-weight:900;font-size:22px;line-height:1;font-variant-numeric:tabular-nums;">{{ readTok }}</span><span style="font-size:11px;color:#6f6f6f;font-variant-numeric:tabular-nums;">tok/s · {{ readPct }}</span></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px;"><span style="font-weight:700;">VRAM {{ usedGb }} / 12 GB</span><span style="{{ fitChip }}display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;font-size:11px;font-weight:700;">{{ fitLabel }}</span></div>
+          <div style="display:flex;height:10px;border-radius:999px;background:#eef1f4;overflow:hidden;">
+            <div style="{{ barModel }}height:100%;background:#2F384C;transition:width 260ms;"></div>
+            <div style="{{ barCtx }}height:100%;background:#10b981;transition:width 260ms;"></div>
+            <div style="{{ barWork }}height:100%;background:#0f97ff;transition:width 260ms;"></div>
+            <div style="{{ barOver }}height:100%;background:repeating-linear-gradient(45deg,#e0283f 0 4px,#f37a89 4px 8px);transition:width 260ms;"></div>
+            <div style="flex:1;"></div>
+            <div style="{{ barReserve }}height:100%;background:repeating-linear-gradient(45deg,#c9d1db 0 3px,#e3e8ee 3px 6px);transition:width 260ms;"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:5px;font-family:ui-monospace,Consolas,monospace;font-size:12px;color:#303030;">
+            <span style="display:flex;justify-content:space-between;"><span style="display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:2px;background:#2F384C;"></span>weights + experts</span><span>{{ mModel }} GB</span></span>
+            <span style="display:flex;justify-content:space-between;"><span style="display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:2px;background:#10b981;"></span>kv cache</span><span>{{ mCtx }} GB</span></span>
+            <span style="display:flex;justify-content:space-between;"><span style="display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:2px;background:#0f97ff;"></span>compute buffers</span><span>{{ mWork }} GB</span></span>
+            <sc-if value="{{ showReserve }}" hint-placeholder-val="{{ true }}">
+              <span style="display:flex;justify-content:space-between;"><span style="display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:2px;background:repeating-linear-gradient(45deg,#c9d1db 0 3px,#e3e8ee 3px 6px);"></span>reserved (headroom)</span><span>{{ mReserve }} GB</span></span>
+            </sc-if>
+          </div>
+        </div>
+      </section>
+      <section style="background:#ffffff;border:1px solid #dee5ee;border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:10px;box-shadow:0 4px 4px rgba(0,0,0,.03),0 1px 2px rgba(0,0,0,.04);">
+        <h2 style="margin:0;font-weight:700;font-size:16px;">Resolved by Auto</h2>
+        <div style="display:flex;flex-direction:column;gap:6px;font-family:ui-monospace,Consolas,monospace;font-size:12px;color:#303030;">
+          <sc-for list="{{ resolved }}" as="rv" hint-placeholder-count="4">
+            <span style="display:flex;justify-content:space-between;gap:10px;"><span style="color:#6f6f6f;">{{ rv.k }}</span><span>{{ rv.v }}</span></span>
+          </sc-for>
+        </div>
+      </section>
+    </aside>
+  </main>
+  </sc-if>
+
+  <sc-if value="{{ hasChanges }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;left:50%;bottom:20px;transform:translateX(-50%);width:min(1040px,calc(100% - 32px));display:flex;align-items:center;gap:16px;padding:12px 12px 12px 20px;background:#ffffff;border:1px solid #dee5ee;border-radius:20px;box-shadow:0 30px 18px rgba(0,0,0,.03),0 13px 13px rgba(0,0,0,.05),0 3px 7px rgba(0,0,0,.06),0 10px 40px rgba(15,23,42,.08);z-index:30;">
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;">
+        <span style="font-weight:700;font-size:14px;">{{ changeCount }} <span style="font-weight:500;color:#6f6f6f;">· {{ applyNote }}</span></span>
+        <span style="{{ changeFont }}font-size:12px;color:#6f6f6f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ changeList }}</span>
+      </div>
+      <sc-if value="{{ applying }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:6px;width:220px;">
+          <span style="font-size:12px;font-weight:500;color:#303030;">{{ applyStep }}</span>
+          <div style="height:6px;border-radius:999px;background:#eef1f4;overflow:hidden;"><div style="{{ applyBar }}height:100%;border-radius:999px;background:#10b981;"></div></div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ notApplying }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button onClick="{{ undo }}" style="height:42px;padding:0 16px;border:1.5px solid #dee5ee;border-radius:14px;background:#ffffff;color:#221e1f;font:700 14px 'GT Walsheim Pro',sans-serif;cursor:pointer;" style-hover="background:#f7f7f7;">Discard</button>
+          <button onClick="{{ apply }}" style="height:42px;padding:0 20px;border:0;border-radius:14px;background:#10b981;color:#ffffff;font:700 14px 'GT Walsheim Pro',sans-serif;cursor:pointer;box-shadow:0 6px 16px rgba(16,185,129,.24);" style-hover="background:#0c8a60;">{{ applyLabel }}</button>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;right:24px;bottom:24px;display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:14px;background:#ffffff;border:1px solid #dee5ee;box-shadow:0 10px 40px rgba(15,23,42,.08),0 1px 3px rgba(15,23,42,.06);font-size:14px;z-index:40;">
+      <span style="display:inline-block;width:20px;height:20px;background:#10b981;mask:url(icons/check.svg) center/contain no-repeat;"></span>
+      <span style="display:flex;flex-direction:column;gap:2px;"><span style="font-weight:700;">{{ toastTitle }}</span><span style="color:#6f6f6f;">{{ toastSub }}</span></span>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ tuning }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(14,17,19,.32);z-index:50;padding:20px;">
+      <div style="position:relative;width:min(600px,100%);max-height:calc(100vh - 40px);overflow-y:auto;display:flex;flex-direction:column;gap:20px;padding:28px;background:#f9fafb;border:1px solid #dee5ee;border-radius:24px;box-shadow:0 16px 48px rgba(0,0,0,.18);">
+        <div style="position:relative;z-index:1;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;">
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <h2 style="margin:0;font-weight:700;font-size:22px;letter-spacing:-0.01em;">{{ tuneTitle }}</h2>
+            <span style="font-size:14px;line-height:1.45;color:#6f6f6f;max-width:560px;">{{ tuneSub }}</span>
+          </div>
+          <sc-if value="{{ tuneRunning }}" hint-placeholder-val="{{ true }}">
+            <button onClick="{{ cancelTune }}" style="flex:none;height:38px;padding:0 16px;border:1.5px solid #dee5ee;border-radius:12px;background:#ffffff;color:#221e1f;font:700 13px 'GT Walsheim Pro',sans-serif;cursor:pointer;" style-hover="background:#f7f7f7;">Cancel</button>
+          </sc-if>
+        </div>
+        {{ tuneViz }}
+        <sc-if value="{{ tuneDone }}" hint-placeholder-val="{{ false }}">
+          <div style="position:relative;z-index:1;display:flex;justify-content:flex-end;gap:10px;">
+            <button onClick="{{ discardTune }}" style="height:44px;padding:0 18px;border:1.5px solid #dee5ee;border-radius:14px;background:#ffffff;color:#221e1f;font:700 14px 'GT Walsheim Pro',sans-serif;cursor:pointer;" style-hover="background:#f7f7f7;">Keep my settings</button>
+            <button onClick="{{ closeTune }}" style="height:44px;padding:0 22px;border:0;border-radius:14px;background:#10b981;color:#ffffff;font:700 14px 'GT Walsheim Pro',sans-serif;cursor:pointer;box-shadow:0 6px 16px rgba(16,185,129,.24);" style-hover="background:#0c8a60;">Review changes</button>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;startMode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;simple&quot;,&quot;expert&quot;],&quot;default&quot;:&quot;simple&quot;,&quot;tsType&quot;:&quot;'simple'|'expert'&quot;},&quot;showDescriptions&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+const SEL = 'select', NUM = 'number', BOOL = 'bool';
+const P = [
+  ['ctx.length', 'Context length', 'ctx', SEL, [['4096', '4K'], ['8192', '8K'], ['16384', '16K'], ['32768', '32K'], ['65536', '64K'], ['131072', '128K'], ['262144', '256K'], ['524288', '512K'], ['1048576', '1M']], '16384', 'load', 'Maximum tokens kept in one chat, up to 1M. The hybrid attention keeps KV cost low, but 512K+ usually needs INT4 and expert offload.'],
+  ['ctx.kvMode', 'KV cache format', 'ctx', SEL, [['auto', 'Automatic'], ['fp16', 'FP16'], ['int8', 'INT8'], ['int4', 'INT4']], 'auto', 'load', 'Precision of the context cache. INT8 halves memory with negligible quality loss; INT4 quarters it.'],
+  ['ctx.ropeScale', 'RoPE scaling', 'ctx', SEL, [['none', 'None'], ['yarn', 'YaRN']], 'none', 'load', 'Extends context beyond the trained window. Only useful above 64K.'],
+  ['server.parallel', 'Parallel slots', 'ctx', NUM, [1, 4, 1], 1, 'load', 'Chats served at once. Each slot reserves its own KV cache.'],
+  ['mem.mode', 'Expert cache / RAM mode', 'mem', SEL, [['auto', 'Automatic'], ['vram', 'VRAM only'], ['offload', 'Offload cold experts']], 'auto', 'load', 'Where inactive MoE experts live. Offloading frees VRAM at some speed cost.'],
+  ['mem.expertCache', 'Expert cache slots', 'mem', NUM, [8, 128, 8], 64, 'load', 'Experts kept hot in VRAM. More slots mean fewer swaps but more memory.'],
+  ['mem.mmap', 'Memory-map weights', 'mem', BOOL, null, true, 'load', 'Load weights lazily from disk. Faster start and lower RAM use.'],
+  ['mem.lock', 'Lock in RAM', 'mem', BOOL, null, false, 'load', 'Stops the OS from paging the model out. Needs enough free RAM.'],
+  ['sys.headroom', 'Resource headroom', 'gpu', SEL, [['shared', 'Leave 15% for other apps'], ['max', 'Full power']], 'shared', 'load', 'Shared keeps 15% of VRAM and 2 CPU cores free and caps the power limit, so the PC stays responsive. Full power uses everything.'],
+  ['gpu.layers', 'GPU / layer split', 'gpu', SEL, [['auto', 'Automatic'], ['all', 'All on GPU'], ['split', 'Split with CPU']], 'auto', 'load', 'Which device holds each layer. All on GPU is fastest when it fits.'],
+  ['gpu.flashAttn', 'Flash attention', 'gpu', BOOL, null, true, 'load', 'Fused attention kernel. Faster and smaller; turn off only to debug.'],
+  ['cpu.threads', 'CPU threads', 'gpu', SEL, [['auto', 'Automatic'], ['2', '2'], ['4', '4'], ['8', '8']], 'auto', 'load', 'Threads for work off the GPU. 8 cores detected. Auto uses 6 when sharing, 8 at full power.'],
+  ['batch.size', 'Prompt batch', 'batch', SEL, [['auto', 'Automatic'], ['512', '512'], ['1024', '1,024'], ['2048', '2,048'], ['4096', '4,096']], 'auto', 'load', 'Logical batch for prefill. Larger reads prompts faster but needs bigger buffers.'],
+  ['batch.ubatch', 'Micro-batch', 'batch', SEL, [['256', '256'], ['512', '512'], ['1024', '1,024']], '512', 'load', 'Physical batch per kernel call. Lower it if you hit out-of-memory during prefill.'],
+  ['perf.draft', 'Speculative decoding', 'perf', BOOL, null, true, 'load', 'Use the built-in draft head to guess tokens ahead and verify them in one pass.'],
+  ['perf.draftDepth', 'Draft depth', 'perf', NUM, [1, 8, 1], 4, 'request', 'Tokens guessed per step. Gains flatten past 5–6.'],
+  ['sample.temperature', 'Temperature', 'sample', NUM, [0, 2, 0.05], 0.7, 'request', 'Randomness of each token choice. 0 is fully deterministic.'],
+  ['sample.topP', 'Top-p', 'sample', NUM, [0, 1, 0.01], 0.95, 'request', 'Sample only from the smallest set of tokens whose probabilities add up to p.'],
+  ['sample.topK', 'Top-k', 'sample', NUM, [0, 200, 1], 40, 'request', 'Sample only from the k most likely tokens. 0 disables.'],
+  ['sample.minP', 'Min-p', 'sample', NUM, [0, 1, 0.01], 0.05, 'request', 'Drop tokens below this fraction of the top token\u2019s probability.'],
+  ['sample.repeatPenalty', 'Repeat penalty', 'sample', NUM, [1, 2, 0.01], 1.05, 'request', 'Discourages repeating recent tokens. Keep near 1.0 for code.'],
+  ['sample.seed', 'Seed', 'sample', NUM, [-1, 99999, 1], -1, 'request', '-1 picks a new random seed each time. Fix it for reproducible output.'],
+];
+const PM = Object.fromEntries(P.map(p => [p[0], { key: p[0], label: p[1], group: p[2], type: p[3], opts: p[4], def: p[5], applies: p[6], desc: p[7] }]));
+const GROUPS = [['ctx', 'Context'], ['mem', 'Memory'], ['gpu', 'GPU & CPU'], ['batch', 'Prompt & batching'], ['perf', 'Speed'], ['sample', 'Sampling']];
+const DEFAULTS = Object.fromEntries(P.map(p => [p[0], p[5]]));
+const CTXV = ['4096', '8192', '16384', '32768', '65536', '131072', '262144', '524288', '1048576'];
+const GOALS = {
+  chat: { title: 'Everyday chat', sub: 'Questions, ideas, writing help', icon: 'chat', ctx: '16384', style: 'balanced', sample: 'Sure. Here is a simple plan for your week: start Monday with the hardest task, keep Wednesday afternoon free for catch-up, and leave Friday for review and planning the next week.' },
+  docs: { title: 'Long documents', sub: 'Summaries of reports, PDFs, notes', icon: 'layers', ctx: '65536', style: 'precise', sample: 'Summary of the 42-page report: revenue grew 18% year on year, driven mostly by the two new regions. Costs rose 9%. The main risk flagged is supplier concentration, covered in section 4.' },
+  code: { title: 'Coding', sub: 'Write, explain and fix code', icon: 'tool', ctx: '32768', style: 'precise', sample: 'The bug is on line 14: the loop runs one step too far, so it reads past the end of the list. Change range(len(items) + 1) to range(len(items)) and the error goes away.' },
+};
+const STYLES = { precise: ['Precise', 'Same answer each time', 0.2, 0.9], balanced: ['Balanced', 'Good for most things', 0.7, 0.95], creative: ['Creative', 'More varied ideas', 1.0, 0.98] };
+const BUILTIN = [
+  ['Strata default', {}],
+  ['Max speed', { 'sys.headroom': 'max', 'ctx.length': '8192', 'ctx.kvMode': 'int8', 'batch.size': '4096', 'perf.draftDepth': 6 }],
+  ['Long context', { 'ctx.length': '131072', 'ctx.kvMode': 'int8', 'ctx.ropeScale': 'yarn', 'mem.mode': 'offload', 'batch.size': '2048' }],
+  ['Low VRAM', { 'ctx.length': '16384', 'ctx.kvMode': 'int4', 'mem.mode': 'offload', 'mem.expertCache': 32, 'batch.size': '512', 'batch.ubatch': '256' }],
+  ['Deterministic eval', { 'sample.temperature': 0, 'sample.topK': 1, 'sample.seed': 42, 'perf.draft': false }],
+];
+const VRAM = 12, LS = 'strata-engine-presets-v1';
+const fmt = (k, v) => { const p = PM[k]; if (p.type === SEL) return (p.opts.find(o => o[0] === v) || [v, v])[1]; if (p.type === BOOL) return v ? 'On' : 'Off'; return String(v); };
+
+
+const ce = React.createElement;
+const T_END = 10.4;
+const ss = (a, b, x) => { x = Math.min(1, Math.max(0, (x - a) / (b - a))); return x * x * (3 - 2 * x); };
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const easeOut3 = x => 1 - Math.pow(1 - clamp(x, 0, 1), 3);
+const easeBack = x => { const c = 1.6; x = clamp(x, 0, 1); return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const PH = [0, 2.0, 4.6, 8.6, T_END];
+const STATUS = ['Checking your hardware', 'Warming up the model', 'Trying setups', 'Locking in the best one', 'Done'];
+// master energy: long ease-in, sustain, long glide out
+const energy = t => 0.03 + 0.97 * Math.pow(ss(0.2, 3.8, t), 1.6) * (1 - ss(7.2, 10.6, t));
+// progress = normalised integral of (base + energy) so the ring fills slow → fast → slow
+const PROG = (() => { const dt = 1 / 240, arr = [0]; let acc = 0; for (let t = 0; t < T_END; t += dt) { acc += (0.1 + energy(t)) * dt; arr.push(acc); } return { arr, dt, total: acc }; })();
+const progAt = t => { if (t >= T_END) return 1; const i = clamp(t / PROG.dt, 0, PROG.arr.length - 1), lo = Math.floor(i), f = i - lo; const v = PROG.arr[lo] + ((PROG.arr[lo + 1] ?? PROG.arr[lo]) - PROG.arr[lo]) * f; return v / PROG.total; };
+const spring = (st, target, dt, k, z) => { const c = 2 * Math.sqrt(k) * z; for (let i = 0; i < 4; i++) { const h = dt / 4; st.v += (k * (target - st.x) - c * st.v) * h; st.x += st.v * h; } return st.x; };
+const reduceMotion = () => { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
+
+function TuneViz({ trials, best, baseGen, onDone }) {
+  const [, force] = React.useState(0);
+  const r = React.useRef(null);
+  const n = trials.length, slot = (PH[3] - PH[2]) / n;
+  const targetAt = t => t < PH[1] ? 0 : t < PH[2] ? baseGen * ss(PH[1] + 0.2, PH[2] - 0.2, t) : t < PH[3] ? (() => { const i = Math.min(n - 1, Math.floor((t - PH[2]) / slot)); const lp = (t - PH[2] - i * slot) / slot; return lp < 0.18 ? (i === 0 ? baseGen : trials[i - 1].tok) : trials[i].tok; })() : trials[best].tok;
+  if (!r.current) r.current = { t: 0, start: null, last: null, angle: 0, angle2: 0, num: { x: 0, v: 0 }, gpu: { x: 3, v: 0 }, cpu: { x: 4, v: 0 }, mem: { x: 2, v: 0 }, lastTarget: 0, popAt: -9, status: 0, statusAt: 0, statusPrev: 0, done: false, rm: reduceMotion() };
+  React.useEffect(() => {
+    let raf;
+    const loop = now => {
+      const s = r.current;
+      if (s.start == null) { s.start = now; s.last = now; }
+      const dt = Math.min(0.04, (now - s.last) / 1000); s.last = now; s.t = (now - s.start) / 1000;
+      const t = s.t, e = energy(t), mf = s.rm ? 0.2 : 1;
+      s.angle = (s.angle + (10 + 520 * e) * dt * mf) % 360;
+      s.angle2 = (s.angle2 - (6 + 210 * e) * dt * mf + 360) % 360;
+      const tgt = targetAt(t);
+      if (Math.abs(tgt - s.lastTarget) > 0.05 && t > PH[2]) s.popAt = t;
+      s.lastTarget = tgt;
+      spring(s.num, tgt, dt, 26, 0.78);
+      const wob = (a, b, c) => Math.sin(t * a) * 0.55 + Math.sin(t * b + c) * 0.45;
+      spring(s.gpu, 3 + 93 * e + 2.5 * e * wob(2.3, 3.7, 1), dt, 18, 1);
+      spring(s.cpu, 5 + e * (58 + 16 * wob(1.3, 2.9, 2)), dt, 14, 1);
+      spring(s.mem, 2 + 56 * e + 1.5 * e * wob(1.9, 3.3, 4), dt, 16, 1);
+      const ph = t < PH[1] ? 0 : t < PH[2] ? 1 : t < PH[3] ? 2 : t < PH[4] ? 3 : 4;
+      if (ph !== s.status) { s.statusPrev = s.status; s.status = ph; s.statusAt = t; }
+      if (t >= T_END && !s.done) { s.done = true; onDone && onDone(); }
+      force(x => (x + 1) % 1e6);
+      if (t < T_END + 3) raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  const s = r.current, t = s.t, e = energy(t), prog = progAt(t), endT = t - T_END, finished = endT >= 0;
+  const S = 320, R = 122, TICKS = 96, lit = prog * TICKS;
+  const pol = (ang, rad) => [Math.cos(ang) * rad, Math.sin(ang) * rad];
+  const A = f => f * Math.PI * 2 - Math.PI / 2;
+
+  // ticks with continuous fade at the head
+  const ticks = [];
+  for (let i = 0; i < TICKS; i++) {
+    const ang = A(i / TICKS), f = clamp(lit - i, 0, 1), head = lit - i >= 0 && lit - i < 5 && !finished ? 1 - (lit - i) / 5 : 0;
+    const len = 9 + head * 6, [x1, y1] = pol(ang, R - len), [x2, y2] = pol(ang, R);
+    ticks.push(ce('line', { key: 'g' + i, x1: x1.toFixed(2), y1: y1.toFixed(2), x2: x2.toFixed(2), y2: y2.toFixed(2), stroke: '#e3e8ee', strokeWidth: 3, strokeLinecap: 'round' }));
+    if (f > 0) ticks.push(ce('line', { key: 'o' + i, x1: x1.toFixed(2), y1: y1.toFixed(2), x2: x2.toFixed(2), y2: y2.toFixed(2), stroke: '#10b981', strokeWidth: 3, strokeLinecap: 'round', opacity: f.toFixed(3) }));
+  }
+  // leading head
+  const [hx, hy] = pol(A(prog), R + 9);
+  const head = prog > 0.002 && !finished ? ce('g', null,
+    ce('circle', { cx: hx.toFixed(2), cy: hy.toFixed(2), r: 10, fill: '#10b981', opacity: (0.10 + e * 0.12).toFixed(3) }),
+    ce('circle', { cx: hx.toFixed(2), cy: hy.toFixed(2), r: 4.5, fill: '#10b981', stroke: '#ffffff', strokeWidth: 2 })) : null;
+
+  // checkpoints for each tested setup
+  const cps = trials.map((tr, i) => {
+    const tEnd = PH[2] + (i + 1) * slot, p = progAt(tEnd), age = t - tEnd;
+    if (age < 0) return null;
+    const isBest = i === best, win = isBest && finished ? easeBack(endT / 0.5) : 0;
+    const sc = easeBack(age / 0.45), [cx, cy] = pol(A(p), R + 22);
+    return ce('circle', { key: 'cp' + i, cx: cx.toFixed(2), cy: cy.toFixed(2), r: ((3 + win * 2.5) * sc).toFixed(2), fill: isBest && finished ? '#10b981' : '#2F384C', opacity: isBest || !finished ? 1 : 0.35 });
+  });
+
+  // inner motion rings
+  const C1 = 2 * Math.PI * 100, seg1 = C1 / 14, d1 = 2 + e * 26;
+  const C2 = 2 * Math.PI * 88, seg2 = C2 / 36, d2 = 1 + e * 5;
+  const motion = ce('g', null,
+    ce('circle', { r: 100, fill: 'none', stroke: '#10b981', strokeWidth: 3, strokeLinecap: 'round', strokeDasharray: d1.toFixed(2) + ' ' + (seg1 - d1).toFixed(2), opacity: (0.12 + e * 0.38).toFixed(3), transform: 'rotate(' + s.angle.toFixed(2) + ')' }),
+    ce('circle', { r: 88, fill: 'none', stroke: '#2F384C', strokeWidth: 1.5, strokeLinecap: 'round', strokeDasharray: d2.toFixed(2) + ' ' + (seg2 - d2).toFixed(2), opacity: (0.08 + e * 0.12).toFixed(3), transform: 'rotate(' + s.angle2.toFixed(2) + ')' }));
+
+  // finish: seal flash + ripples
+  const flash = finished ? Math.pow(Math.max(0, 1 - endT / 0.7), 2) : 0;
+  const ripples = finished && !s.rm ? [0, 0.22, 0.44].map((d, k) => { const x = (endT - d) / 1.6; if (x <= 0 || x >= 1) return null; const ex = easeOut3(x); return ce('circle', { key: 'rp' + k, r: (R + 2 + ex * 58).toFixed(2), fill: 'none', stroke: '#10b981', strokeWidth: (2.5 * (1 - ex) + 0.4).toFixed(2), opacity: (0.5 * Math.pow(1 - x, 2)).toFixed(3) }); }) : [];
+
+  const ring = ce('svg', { viewBox: '-' + S / 2 + ' -' + S / 2 + ' ' + S + ' ' + S, style: { position: 'absolute', inset: 0, width: '100%', height: '100%', overflow: 'visible' } },
+    ce('circle', { r: R - 14, fill: '#10b981', opacity: (0.025 + e * 0.04 + flash * 0.08).toFixed(3) }),
+    ripples, ticks,
+    ce('circle', { r: R + 1, fill: 'none', stroke: '#10b981', strokeWidth: 3, opacity: (flash * 0.9).toFixed(3) }),
+    cps, head, motion,
+    ce('circle', { r: 78, fill: '#ffffff', stroke: '#eeeeee', strokeWidth: 1 }));
+
+  // centre number
+  const num = Math.max(0, s.num.x), pop = Math.max(0, 1 - (t - s.popAt) / 0.45), finPop = finished ? Math.sin(clamp(endT / 0.5, 0, 1) * Math.PI) : 0;
+  const scale = 1 + 0.04 * Math.sin(pop * Math.PI) * pop + 0.06 * finPop;
+  const delta = (num - baseGen) / baseGen * 100;
+  const showDelta = t > PH[2] + 0.3;
+  const centre = ce('div', { style: { position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, pointerEvents: 'none' } },
+    ce('span', { style: { fontWeight: 900, fontSize: 58, lineHeight: 1, letterSpacing: '-0.035em', color: t < PH[1] ? '#c9d1db' : '#221e1f', fontVariantNumeric: 'tabular-nums', transform: 'scale(' + scale.toFixed(4) + ')', transition: 'color 400ms' } }, num.toFixed(finished && endT > 0.8 ? 0 : 1)),
+    ce('span', { style: { fontSize: 13, fontWeight: 500, color: '#6f6f6f' } }, 'tok/s'),
+    ce('span', { style: { height: 18, fontSize: 12, fontWeight: 700, fontVariantNumeric: 'tabular-nums', color: delta >= 0.5 ? '#0c8a60' : '#6f6f6f', opacity: showDelta ? ss(PH[2] + 0.3, PH[2] + 0.8, t).toFixed(3) : 0 } }, (delta >= 0 ? '+' : '') + delta.toFixed(0) + '% vs now'));
+
+  // status with crossfade
+  const sx = ss(s.statusAt, s.statusAt + 0.45, t);
+  const lineStyle = (o, y) => ({ position: 'absolute', left: 0, right: 0, textAlign: 'center', fontWeight: 700, fontSize: 16, color: '#221e1f', opacity: o.toFixed(3), transform: 'translateY(' + y.toFixed(2) + 'px)' });
+  const label = i => i === 4 ? 'Done' : i === 2 ? STATUS[2] + ' · ' + Math.min(n, Math.floor((t - PH[2]) / slot) + 1) + ' of ' + n : STATUS[i] + '…';
+  const status = ce('div', { style: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 } },
+    ce('div', { style: { display: 'flex', gap: 6 } }, [0, 1, 2, 3].map(i => { const active = i === Math.min(3, s.status) && !finished; return ce('span', { key: i, style: { width: active ? 24 : 6, height: 6, borderRadius: 999, background: i <= s.status || finished ? '#10b981' : '#dee5ee', opacity: active ? 0.55 + 0.45 * (0.5 + 0.5 * Math.sin(t * 4)) : 1, transition: 'width 500ms cubic-bezier(.2,.7,.2,1), background 400ms' } }); })),
+    ce('div', { style: { position: 'relative', width: '100%', height: 22 } },
+      sx < 1 ? ce('span', { style: lineStyle(1 - sx, -8 * sx) }, label(s.statusPrev)) : null,
+      ce('span', { style: lineStyle(sx, 8 * (1 - sx)) }, label(s.status))));
+
+  // result chip
+  const bestTok = trials[best].tok, gain = (bestTok - baseGen) / baseGen * 100, pc = finished ? easeBack((endT - 0.25) / 0.55) : 0;
+  const result = ce('div', { style: { display: 'flex', justifyContent: 'center', height: 40 } },
+    finished && endT > 0.25 ? ce('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 8, height: 40, padding: '0 18px', borderRadius: 999, background: '#ecfdf5', color: '#0c8a60', fontWeight: 700, fontSize: 15, transform: 'translateY(' + ((1 - clamp(pc, 0, 1)) * 6).toFixed(2) + 'px) scale(' + (0.9 + 0.1 * pc).toFixed(4) + ')', opacity: clamp((endT - 0.25) / 0.3, 0, 1).toFixed(3) } },
+      ce('span', { style: { display: 'inline-block', width: 16, height: 16, background: '#0c8a60', mask: 'url(icons/check.svg) center/contain no-repeat', WebkitMask: 'url(icons/check.svg) center/contain no-repeat' } }),
+      gain >= 0.5 ? '+' + gain.toFixed(0) + '% faster · ' + trials[best].label : 'Your current settings are already the fastest') : null);
+
+  // meters
+  const meter = (icon, label, v, max, unit) => ce('div', { style: { flex: '1 1 140px', display: 'flex', flexDirection: 'column', gap: 10, padding: '14px 16px', background: '#ffffff', border: '1px solid #dee5ee', borderRadius: 16 } },
+    ce('div', { style: { display: 'flex', alignItems: 'center', gap: 8 } },
+      ce('span', { style: { display: 'inline-block', width: 16, height: 16, background: '#2F384C', mask: 'url(icons/' + icon + '.svg) center/contain no-repeat', WebkitMask: 'url(icons/' + icon + '.svg) center/contain no-repeat' } }),
+      ce('span', { style: { flex: 1, fontSize: 13, fontWeight: 500, color: '#6f6f6f' } }, label),
+      ce('span', { style: { fontSize: 13, fontWeight: 700, color: '#221e1f', fontVariantNumeric: 'tabular-nums' } }, Math.max(0, v).toFixed(0) + unit)),
+    ce('div', { style: { height: 6, borderRadius: 999, background: '#eef1f4', overflow: 'hidden' } }, ce('div', { style: { width: clamp(v / max * 100, 0, 100).toFixed(2) + '%', height: '100%', borderRadius: 999, background: '#10b981' } })));
+
+  return ce('div', { style: { display: 'flex', flexDirection: 'column', gap: 18 } },
+    ce('div', { style: { position: 'relative', width: 320, height: 320, maxWidth: '100%', margin: '0 auto' } }, ring, centre),
+    status, result,
+    ce('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 10 } }, meter('gpu', 'Graphics card', s.gpu.x, 100, '%'), meter('cpu', 'Processor', s.cpu.x, 100, '%'), meter('memory', 'Memory', s.mem.x, 60, ' GB/s')));
+}
+
+class Component extends DCLogic {
+  fileRef = React.createRef();
+  state = {
+    cfg: { ...DEFAULTS }, saved: { ...DEFAULTS }, goal: 'chat', savedGoal: 'chat',
+    mode: this.props.startMode ?? 'simple', tab: 'params', q: '', grp: 'all', changedOnly: false, showDesc: this.props.showDescriptions ?? false,
+    raw: null, rawErr: null, rawWarn: null, copied: false,
+    userPresets: this.loadPresets(), naming: false, nameDraft: '',
+    tuning: null, applying: null, toast: null, stream: '',
+  };
+  loadPresets() { try { return JSON.parse(localStorage.getItem(LS)) || [['My coding setup', { 'ctx.length': '32768', 'sample.temperature': 0.2, 'sample.topP': 0.9, 'sample.repeatPenalty': 1.0 }]]; } catch (e) { return []; } }
+  savePresets(list) { try { localStorage.setItem(LS, JSON.stringify(list)); } catch (e) {} }
+
+  calc(c) {
+    const ctxK = +c['ctx.length'] / 1024;
+    const kv = c['ctx.kvMode'] === 'auto' ? (ctxK >= 256 ? 'int4' : ctxK >= 64 ? 'int8' : 'fp16') : c['ctx.kvMode'];
+    const batch = c['batch.size'] === 'auto' ? (c['sys.headroom'] === 'max' ? (ctxK >= 16 ? 4096 : 2048) : (ctxK >= 32 ? 2048 : 1024)) : +c['batch.size'];
+    const gpu = c['gpu.layers'] === 'auto' ? 'all' : c['gpu.layers'];
+    const maxP = c['sys.headroom'] === 'max', reserve = maxP ? 0 : VRAM * 0.15;
+    const threads = c['cpu.threads'] === 'auto' ? (maxP ? 8 : 6) : +c['cpu.threads'];
+    const memMode = c['mem.mode'] === 'auto' ? (ctxK >= 256 ? 'offload' : 'vram') : c['mem.mode'];
+    const par = Math.max(1, +c['server.parallel'] || 1), flash = !!c['gpu.flashAttn'];
+    const perK = { fp16: 0.025, int8: 0.0125, int4: 0.007 }[kv] * (flash ? 1 : 1.15);
+    const mCtx = ctxK * perK * par;
+    const mWork = 0.3 + batch / 2048 * 0.5 + (+c['batch.ubatch']) / 1024 * 0.15;
+    const slots = +c['mem.expertCache'] || 64, off = memMode === 'offload';
+    const mModel = (5.0 + slots * 0.022) * (off ? 0.72 : 1) * (gpu === 'split' ? 0.6 : 1);
+    const used = mModel + mCtx + mWork, over = Math.max(0, used - (VRAM - reserve)), spill = over > 0;
+    let gen = 52 / (1 + ctxK / 400) * (kv === 'int4' ? 0.96 : 1);
+    if (c['perf.draft']) gen *= 1.22 + (Math.min(+c['perf.draftDepth'] || 1, 6) - 1) * 0.02;
+    if (off) gen *= 0.82 * (0.8 + slots / 320);
+    if (gpu === 'split') gen *= 0.55 + threads * 0.03;
+    if (spill) gen *= 0.4;
+    if (par > 1) gen /= 1 + (par - 1) * 0.35;
+    if (maxP) gen *= 1.07;
+    let read = ({ 512: 640, 1024: 880, 2048: 1030, 4096: 1090 })[batch] || 880;
+    if (!flash) read *= 0.8; if (maxP) read *= 1.08; if (gpu === 'split') read *= 0.6; if (spill) read *= 0.35;
+    return { kv, batch, gpu, threads, memMode, mModel, mCtx, mWork, used, over, spill, reserve, free: Math.max(0, VRAM - reserve - used), gen, read };
+  }
+  styleOf(c) { return Object.keys(STYLES).find(k => Math.abs(STYLES[k][2] - c['sample.temperature']) < 0.001 && Math.abs(STYLES[k][3] - c['sample.topP']) < 0.001) || null; }
+
+  componentDidMount() { this.restartStream(); }
+  componentWillUnmount() { clearInterval(this.iv); clearTimeout(this.tt); (this.timers || []).forEach(clearTimeout); }
+  componentDidUpdate() { const k = this.state.goal + ':' + this.calc(this.state.cfg).gen.toFixed(0); if (k !== this._lastKey) this.restartStream(); }
+  restartStream() {
+    clearInterval(this.iv);
+    this._lastKey = this.state.goal + ':' + this.calc(this.state.cfg).gen.toFixed(0);
+    const full = GOALS[this.state.goal].sample; let i = 0, pause = 0;
+    this.setState({ stream: '' });
+    this.iv = setInterval(() => {
+      if (pause > 0) { if (--pause === 0) { i = 0; this.setState({ stream: '' }); } return; }
+      const cps = this.calc(this.state.cfg).gen * 0.75 * 5.6;
+      i = Math.min(full.length, i + Math.max(1, Math.round(cps * 0.05)));
+      this.setState({ stream: full.slice(0, i) });
+      if (i >= full.length) pause = 50;
+    }, 50);
+  }
+  later(fn, ms) { (this.timers ||= []).push(setTimeout(fn, ms)); }
+
+  setCfg(patch, keepRaw) { this.setState(s => ({ cfg: { ...s.cfg, ...patch }, ...(keepRaw ? {} : { raw: null, rawErr: null, rawWarn: null }) })); }
+  rawText() { const s = this.state; return JSON.stringify({ schema: 'strata.engine/1', model: 'qwen3.8-flash-next', simple: { goal: s.goal, style: this.styleOf(s.cfg) || 'custom' }, engine: s.cfg }, null, 2); }
+  parseRaw(text) {
+    let obj;
+    try { obj = JSON.parse(text); } catch (e) { const m = /position (\d+)/.exec(e.message); let line = ''; if (m) line = ` (line ${text.slice(0, +m[1]).split('\n').length})`; this.setState({ raw: text, rawErr: 'Invalid JSON' + line + ': ' + e.message.replace(/^JSON\.parse: |^Unexpected/, s => s ? s : ''), rawWarn: null }); return; }
+    const eng = obj && obj.engine; if (!eng || typeof eng !== 'object') { this.setState({ raw: text, rawErr: 'Missing "engine" object.', rawWarn: null }); return; }
+    const patch = {}, unknown = [], errs = [];
+    for (const [k, v] of Object.entries(eng)) {
+      const p = PM[k]; if (!p) { unknown.push(k); continue; }
+      if (p.type === SEL && !p.opts.some(o => o[0] === v)) errs.push(`${k}: "${v}" is not one of ${p.opts.map(o => o[0]).join(', ')}`);
+      else if (p.type === NUM && (typeof v !== 'number' || v < p.opts[0] || v > p.opts[1])) errs.push(`${k}: expected a number from ${p.opts[0]} to ${p.opts[1]}`);
+      else if (p.type === BOOL && typeof v !== 'boolean') errs.push(`${k}: expected true or false`);
+      else patch[k] = v;
+    }
+    if (errs.length) { this.setState({ raw: text, rawErr: errs.join('\n'), rawWarn: null }); return; }
+    const goal = obj.simple && GOALS[obj.simple.goal] ? obj.simple.goal : this.state.goal;
+    this.setState(s => ({ raw: text, rawErr: null, rawWarn: unknown.length ? `Ignored unknown key${unknown.length > 1 ? 's' : ''}: ${unknown.join(', ')}` : null, cfg: { ...s.cfg, ...patch }, goal }));
+  }
+
+  apply() {
+    const steps = ['Pausing the engine…', 'Loading with new settings…', 'Warming up…'];
+    const needsLoad = Object.keys(this.state.cfg).some(k => this.state.cfg[k] !== this.state.saved[k] && PM[k].applies === 'load');
+    const inc = needsLoad ? 4 : 12; let p = 0;
+    this.setState({ applying: { p: 0, step: needsLoad ? steps[0] : 'Saving…' } });
+    const tick = () => {
+      p += inc;
+      if (p >= 100) {
+        const g = this.calc(this.state.cfg).gen.toFixed(0);
+        this.setState(s => ({ saved: { ...s.cfg }, savedGoal: s.goal, applying: null, raw: null, toast: needsLoad ? { t: 'Engine reloaded', s: `Running at ${g} tok/s. Saved to engine.json.` } : { t: 'Saved', s: 'Applies from your next message.' } }));
+        clearTimeout(this.tt); this.tt = setTimeout(() => this.setState({ toast: null }), 3200); return;
+      }
+      this.setState({ applying: { p, step: needsLoad ? steps[Math.min(2, Math.floor(p / 34))] : 'Saving…' } });
+      this.later(tick, 70);
+    };
+    this.later(tick, 70);
+  }
+  startTune() {
+    const s = this.state, g = GOALS[s.goal], st = STYLES[g.style];
+    const base = { ...DEFAULTS, 'sys.headroom': s.cfg['sys.headroom'], 'ctx.length': g.ctx, 'sample.temperature': st[2], 'sample.topP': st[3] };
+    const cand = [
+      ['batch 1024 · kv fp16', { 'batch.size': '1024', 'ctx.kvMode': 'fp16' }],
+      ['batch 2048 · kv fp16', { 'batch.size': '2048', 'ctx.kvMode': 'fp16' }],
+      ['batch 2048 · kv int8', { 'batch.size': '2048', 'ctx.kvMode': 'int8' }],
+      ['batch 4096 · kv int8', { 'batch.size': '4096', 'ctx.kvMode': 'int8' }],
+      ['batch 4096 · int8 · draft 6', { 'batch.size': '4096', 'ctx.kvMode': 'int8', 'perf.draftDepth': 6 }],
+    ].map(([label, p]) => { const cfg = { ...base, ...p }, cc = this.calc(cfg); return { label, cfg, tok: +(cc.gen + cc.read / 400).toFixed(1), spill: cc.spill, used: cc.used }; });
+    let best = 0; cand.forEach((c, i) => { if (!c.spill && c.tok > cand[best].tok) best = i; });
+    this._run = (this._run || 0) + 1;
+    this.setState({ tuning: { run: this._run, trials: cand.map(({ label, tok }) => ({ label, tok })), best, bestCfg: cand[best].cfg, vramT: cand[best].used, done: false } });
+  }
+  _tuneDone = () => { this.setState(x => x.tuning ? { tuning: { ...x.tuning, done: true } } : null); };
+
+  renderVals() {
+    const s = this.state, c = s.cfg, cc = this.calc(c), ca = this.calc(s.saved);
+    const isExpert = s.mode === 'expert';
+    const total = Math.max(VRAM, cc.used + cc.reserve), pct = v => `width:${(v / total * 100).toFixed(2)}%;`;
+    const fit = cc.spill ? 'over' : cc.free < 1.2 ? 'tight' : 'ok';
+    const fitMap = {
+      ok: ['Fits comfortably', 'background:#ecfdf5;color:#0c8a60;', cc.reserve > 0 ? `Fits with ${cc.free.toFixed(1)} GB to spare, plus ${cc.reserve.toFixed(1)} GB kept free for your other apps.` : `Everything fits with ${cc.free.toFixed(1)} GB to spare. Full power: Strata uses the whole card.`],
+      tight: ['Tight fit', 'background:#fff6e0;color:#8a5a00;', 'It fits, but only just. Other apps using the graphics card may slow it down.'],
+      over: ['Too big', 'background:#fdecee;color:#b01a2e;', `It needs ${cc.over.toFixed(1)} GB more than your graphics card has, so part of it moves to slower system memory.`],
+    }[fit];
+    const style = this.styleOf(c), g = GOALS[s.goal], ctxV = c['ctx.length'];
+    const pages = Math.round(+ctxV / 650);
+    const changedKeys = Object.keys(c).filter(k => c[k] !== s.saved[k]);
+    const loadN = changedKeys.filter(k => PM[k].applies === 'load').length;
+    const pctD = (a, b) => { const d = (a - b) / b * 100; return Math.abs(d) < 0.5 ? 'same as now' : `${d > 0 ? '+' : ''}${d.toFixed(0)}% vs now`; };
+    const anyChange = changedKeys.length > 0;
+
+    // expert rows
+    const ql = s.q.trim().toLowerCase();
+    const rowsFor = gk => P.map(p => PM[p[0]]).filter(p => p.group === gk)
+      .filter(p => !ql || p.label.toLowerCase().includes(ql) || p.key.toLowerCase().includes(ql) || p.desc.toLowerCase().includes(ql))
+      .filter(p => !s.changedOnly || c[p.key] !== s.saved[p.key])
+      .map(p => {
+        const v = c[p.key], unsaved = v !== s.saved[p.key], isDef = v === p.def;
+        const auto = { 'ctx.kvMode': cc.kv.toUpperCase(), 'batch.size': String(cc.batch), 'gpu.layers': cc.gpu === 'all' ? 'all on GPU' : 'split', 'cpu.threads': String(cc.threads), 'mem.mode': cc.memMode }[p.key];
+        return {
+          label: p.label, key: p.key, desc: p.desc, showDesc: s.showDesc, unsaved,
+          meta: `${p.applies === 'load' ? 'Reloads engine' : 'Next message'} · default ${fmt(p.key, p.def)}${v === 'auto' && auto ? ` · Auto → ${auto}` : ''}${!isDef ? ' · custom' : ''}`,
+          isSelect: p.type === SEL, isNumber: p.type === NUM, isBool: p.type === BOOL,
+          value: p.type === BOOL ? '' : v, options: p.type === SEL ? p.opts.map(([ov, ol]) => ({ v: ov, l: ol })) : [],
+          min: p.opts?.[0], max: p.opts?.[1], step: p.opts?.[2],
+          onSelect: e => this.setCfg({ [p.key]: e.target.value }),
+          onNumber: e => { const n = parseFloat(e.target.value); if (!isNaN(n)) this.setCfg({ [p.key]: Math.min(p.opts[1], Math.max(p.opts[0], n)) }); },
+          onToggle: () => this.setCfg({ [p.key]: !v }), boolLabel: v ? 'On' : 'Off',
+          track: `background:${v ? '#10b981' : '#dee5ee'};`, knob: `transform:translateX(${v ? 16 : 0}px);`,
+          revert: () => this.setCfg({ [p.key]: s.saved[p.key] }), revertStyle: unsaved ? '' : 'visibility:hidden;',
+          rowStyle: unsaved ? 'background:#fffbf0;' : '',
+        };
+      });
+    const groups = GROUPS.filter(([gk]) => s.grp === 'all' || s.grp === gk).map(([gk, title]) => { const rows = rowsFor(gk); return { title, rows, count: `${rows.length} ${rows.length === 1 ? 'setting' : 'settings'}` }; }).filter(x => x.rows.length);
+
+    const allPresets = [...BUILTIN.map(([n, p]) => [n, p, false]), ...s.userPresets.map(([n, p]) => [n, p, true])];
+    const resolve = p => ({ ...DEFAULTS, ...p });
+    const same = (a, b) => Object.keys(DEFAULTS).every(k => a[k] === b[k]);
+    const summary = p => { const r = resolve(p); const bits = [fmt('ctx.length', r['ctx.length']), r['ctx.kvMode'] === 'auto' ? 'kv auto' : r['ctx.kvMode'], `t=${r['sample.temperature']}`]; if (r['mem.mode'] === 'offload') bits.push('offload'); return bits.join(' · '); };
+
+    const raw = s.raw ?? this.rawText();
+    const rawLines = raw.split('\n').length;
+    const tsteps = [['Checking your hardware', 'RTX 4070 · 12 GB'], ['Testing speed', `${ca.gen.toFixed(0)} tok/s`], [`Picking settings for ${g.title.toLowerCase()}`, 'Done']];
+    const chipOn = 'background:#221e1f;color:#ffffff;border:1px solid #221e1f;', chipOff = 'background:#ffffff;color:#303030;border:1px solid #dee5ee;';
+    const seg = on => on ? 'background:#ffffff;color:#221e1f;box-shadow:0 1px 2px rgba(0,0,0,.06),0 4px 4px rgba(0,0,0,.03);' : 'background:transparent;color:#6f6f6f;';
+
+    return {
+      appliedGen: ca.gen.toFixed(0),
+      isSimple: !isExpert, isExpert,
+      toSimple: () => this.setState({ mode: 'simple' }), toExpert: () => this.setState({ mode: 'expert' }),
+      modeSimpleStyle: isExpert ? 'background:transparent;color:#6f6f6f;' : 'background:#221e1f;color:#ffffff;', modeExpertStyle: isExpert ? 'background:#221e1f;color:#ffffff;' : 'background:transparent;color:#6f6f6f;',
+      modeBarWidth: isExpert ? 'max-width:1360px;' : 'max-width:1200px;',
+      modeHint: isExpert ? `Every parameter, presets and the raw config. Same settings as Simple.` : 'Pick what you need and Strata handles the rest.',
+      paramCount: P.length,
+      // simple
+      startTune: () => this.startTune(),
+      goals: Object.entries(GOALS).map(([k, gg]) => { const sel = s.goal === k; return {
+        title: gg.title, sub: gg.sub,
+        pick: () => { const st = STYLES[gg.style]; this.setState({ goal: k }); this.setCfg({ 'ctx.length': gg.ctx, 'sample.temperature': st[2], 'sample.topP': st[3] }); },
+        cardStyle: sel ? 'background:#ecfdf5;border:1.5px solid #10b981;' : 'background:#ffffff;border:1.5px solid #dee5ee;',
+        iconWrap: sel ? 'background:#ffffff;' : 'background:#f7f7f7;',
+        iconStyle: `background:${sel ? '#0c8a60' : '#2F384C'};mask:url(icons/${gg.icon}.svg) center/contain no-repeat;`,
+      }; }),
+      headroom: [['shared', 'Leave room for other apps', 'Keeps 15% of graphics memory and 2 CPU cores free, so browsing, calls and video stay smooth.', 'activity'], ['max', 'Full power', 'Uses all of the graphics card and every CPU core for the fastest replies. Best when Strata is the only thing running.', 'bolt']].map(([k, t, sub, ic]) => {
+        const sel = c['sys.headroom'] === k, alt = this.calc({ ...c, 'sys.headroom': k });
+        return { title: t, sub, stat: `≈ ${alt.gen.toFixed(0)} tok/s · ${k === 'max' ? 'all 12 GB' : (VRAM * 0.85).toFixed(1) + ' GB for Strata'}`,
+          pick: () => this.setCfg({ 'sys.headroom': k }),
+          cardStyle: sel ? 'background:#ecfdf5;border:1.5px solid #10b981;' : 'background:#ffffff;border:1.5px solid #dee5ee;',
+          radio: sel ? 'border:6px solid #10b981;background:#ffffff;' : 'border:1.5px solid #c9d1db;background:#ffffff;',
+          iconStyle: `background:${sel ? '#0c8a60' : '#2F384C'};mask:url(icons/${ic}.svg) center/contain no-repeat;` };
+      }),
+      pages: pages.toLocaleString(), ctxLabel: fmt('ctx.length', ctxV), ctxIdx: Math.max(0, CTXV.indexOf(ctxV)),
+      setCtxIdx: e => this.setCfg({ 'ctx.length': CTXV[+e.target.value] }),
+      ctxIsRec: ctxV === g.ctx, ctxNotRec: ctxV !== g.ctx, resetCtx: () => this.setCfg({ 'ctx.length': g.ctx }),
+      ctxHint: +ctxV > +g.ctx ? `More than ${g.title.toLowerCase()} usually needs. It uses more memory and writes a little slower.` : +ctxV < +g.ctx ? 'Less than recommended. Long chats or files may get cut off, but replies come a bit faster.' : `About ${pages} pages of text. The right size for ${g.title.toLowerCase()} on this PC.`,
+      styles: Object.entries(STYLES).map(([k, [t, sub, temp, tp]]) => ({ title: t, sub: style === null && k === 'balanced' ? 'Custom values set in Expert' : sub, pick: () => this.setCfg({ 'sample.temperature': temp, 'sample.topP': tp }), btnStyle: style === k ? 'background:#ffffff;box-shadow:0 1px 2px rgba(0,0,0,.06),0 4px 4px rgba(0,0,0,.03);' : 'background:transparent;' })),
+      previewTag: anyChange ? 'Preview · not applied' : 'Current settings',
+      streamText: s.stream, wps: Math.round(cc.gen * 0.75), readSec: (6500 / cc.read).toFixed(1),
+      genTokS: cc.gen.toFixed(0), genVs: pctD(cc.gen, ca.gen),
+      usedGb: cc.used.toFixed(1), mModel: cc.mModel.toFixed(1), mCtx: cc.mCtx.toFixed(1), mWork: cc.mWork.toFixed(1), mFree: cc.free.toFixed(1),
+      barModel: pct(cc.mModel), barCtx: pct(cc.mCtx), barWork: pct(Math.max(0, cc.mWork - cc.over)), barOver: pct(cc.over), barReserve: pct(cc.reserve), showReserve: cc.reserve > 0, mReserve: cc.reserve.toFixed(1),
+      fitLabel: fitMap[0], fitChip: fitMap[1], fitHint: fitMap[2], fitBox: { ok: 'background:#f7f7f7;color:#303030;', tight: 'background:#fff6e0;color:#8a5a00;', over: 'background:#fdecee;color:#b01a2e;' }[fit],
+      // expert
+      presets: allPresets.map(([name, p, custom], i) => { const active = same(resolve(p), c); return {
+        name, sub: summary(p), custom, active,
+        load: () => this.setCfg(resolve(p)),
+        remove: e => { e.stopPropagation(); const list = s.userPresets.filter((_, j) => j !== i - BUILTIN.length); this.savePresets(list); this.setState({ userPresets: list }); },
+        style: active ? 'background:#ecfdf5;border:1.5px solid #10b981;' : 'background:#ffffff;border:1.5px solid #dee5ee;',
+      }; }),
+      naming: s.naming, notNaming: !s.naming, nameDraft: s.nameDraft,
+      startName: () => this.setState({ naming: true, nameDraft: '' }), cancelName: () => this.setState({ naming: false }),
+      onName: e => this.setState({ nameDraft: e.target.value }),
+      onNameKey: e => { if (e.key === 'Enter') this._savePreset(); if (e.key === 'Escape') this.setState({ naming: false }); },
+      savePreset: () => this._savePreset(),
+      tabParams: s.tab === 'params', tabRaw: s.tab === 'raw',
+      toParams: () => this.setState({ tab: 'params' }), toRaw: () => this.setState({ tab: 'raw', raw: null, rawErr: null, rawWarn: null }),
+      tabParamsStyle: seg(s.tab === 'params'), tabRawStyle: seg(s.tab === 'raw'),
+      q: s.q, onQ: e => this.setState({ q: e.target.value }),
+      unsavedN: changedKeys.length, toggleChanged: () => this.setState(x => ({ changedOnly: !x.changedOnly })), changedBtnStyle: s.changedOnly ? chipOn : chipOff,
+      toggleDesc: () => this.setState(x => ({ showDesc: !x.showDesc })), descBtnStyle: s.showDesc ? chipOn : chipOff,
+      groupChips: [['all', 'All'], ...GROUPS].map(([k, l]) => ({ label: l, pick: () => this.setState({ grp: k }), style: s.grp === k ? chipOn : chipOff })),
+      groups, noResults: groups.length === 0,
+      rawValue: raw, rawRows: rawLines, gutter: Array.from({ length: rawLines }, (_, i) => i + 1).join('\n'),
+      onRaw: e => this.parseRaw(e.target.value),
+      rawStatus: s.rawErr ? 'Invalid — draft not updated' : s.rawWarn ? 'Valid with warnings' : 'Valid · in sync',
+      rawChip: s.rawErr ? 'background:#fdecee;color:#b01a2e;' : s.rawWarn ? 'background:#fff6e0;color:#8a5a00;' : 'background:#ecfdf5;color:#0c8a60;',
+      rawHasMsg: !!(s.rawErr || s.rawWarn), rawMsg: s.rawErr || s.rawWarn || '',
+      rawMsgStyle: s.rawErr ? 'background:#fdecee;color:#b01a2e;white-space:pre-wrap;' : 'background:#fff6e0;color:#8a5a00;',
+      rawMsgIcon: `background:currentColor;mask:url(icons/${s.rawErr ? 'error' : 'warning'}.svg) center/contain no-repeat;`,
+      rawFormat: () => { if (!s.rawErr) this.setState({ raw: null, rawWarn: null }); else { try { this.parseRaw(JSON.stringify(JSON.parse(raw), null, 2)); } catch (e) {} } },
+      copyLabel: s.copied ? 'Copied' : 'Copy',
+      rawCopy: () => { navigator.clipboard?.writeText(raw); this.setState({ copied: true }); this.later(() => this.setState({ copied: false }), 1400); },
+      rawExport: () => { const b = new Blob([raw], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'engine.json'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000); },
+      rawImport: () => this.fileRef.current?.click(), fileRef: this.fileRef,
+      onFile: e => { const f = e.target.files?.[0]; if (!f) return; f.text().then(t => this.parseRaw(t)); e.target.value = ''; },
+      genTok: cc.gen.toFixed(1), genPct: pctD(cc.gen, ca.gen), readTok: Math.round(cc.read).toLocaleString(), readPct: pctD(cc.read, ca.read),
+      resolved: [['sys.headroom', c['sys.headroom'] === 'max' ? '0% reserved' : '15% reserved'], ['ctx.kvMode', cc.kv], ['batch.size', String(cc.batch)], ['gpu.layers', cc.gpu === 'all' ? 'all (48/48)' : 'split (29/48)'], ['cpu.threads', String(cc.threads)], ['mem.mode', cc.memMode]].map(([k, v]) => ({ k, v })),
+      // change bar
+      hasChanges: anyChange || s.applying != null,
+      changeCount: changedKeys.length === 1 ? '1 unsaved change' : `${changedKeys.length} unsaved changes`,
+      applyNote: loadN ? `${loadN} reload${loadN > 1 ? '' : 's'} the engine (~4 s), chats are kept` : 'applies from the next message',
+      changeList: changedKeys.map(k => `${isExpert ? k : PM[k].label} ${fmt(k, s.saved[k])} → ${fmt(k, c[k])}`).join('   ·   '),
+      changeFont: isExpert ? 'font-family:ui-monospace,Consolas,monospace;' : '',
+      applying: s.applying != null, notApplying: s.applying == null,
+      applyStep: s.applying?.step ?? '', applyBar: `width:${s.applying?.p ?? 0}%;transition:width 70ms linear;`,
+      applyLabel: loadN ? 'Apply & reload' : 'Save',
+      undo: () => this.setState(x => ({ cfg: { ...x.saved }, raw: null, rawErr: null, rawWarn: null })),
+      apply: () => this.apply(),
+      toast: !!s.toast, toastTitle: s.toast?.t ?? '', toastSub: s.toast?.s ?? '',
+      tuning: !!s.tuning, tuneDone: !!s.tuning?.done,
+      tuneRunning: !!s.tuning && !s.tuning.done,
+      tuneTitle: s.tuning?.done ? 'Your PC is tuned' : 'Tuning for your PC',
+      tuneSub: s.tuning?.done ? 'Strata found the fastest setup for ' + g.title.toLowerCase() + '. Nothing changes until you review and apply it.' : 'Strata is testing your PC with the model to find the fastest setup. About 10 seconds.',
+      tuneViz: s.tuning ? ce(TuneViz, { key: s.tuning.run, trials: s.tuning.trials, best: s.tuning.best, baseGen: ca.gen, vramT: s.tuning.vramT, onDone: this._tuneDone }) : null,
+      cancelTune: () => this.setState({ tuning: null }),
+      discardTune: () => this.setState({ tuning: null }),
+      closeTune: () => { const c = this.state.tuning?.bestCfg; this.setState({ tuning: null }); if (c) this.setCfg(c); },
+    };
+  }
+  _savePreset() {
+    const name = this.state.nameDraft.trim(); if (!name) return;
+    const diff = Object.fromEntries(Object.keys(DEFAULTS).filter(k => this.state.cfg[k] !== DEFAULTS[k]).map(k => [k, this.state.cfg[k]]));
+    const list = [...this.state.userPresets, [name, diff]];
+    this.savePresets(list); this.setState({ userPresets: list, naming: false });
+  }
+}
+</script>
+</body>
+</html>

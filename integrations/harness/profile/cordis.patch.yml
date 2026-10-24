@@ -1,0 +1,66 @@
+# The Strata profile: DeepSeek Harness as the agent backend for a *local* model.
+#
+# This is a patch layer over the shipped base + web-app bundles (see package.json). It does two
+# things and nothing else:
+#
+#   1. points the agent's model at `strata-local`, the Strata API worker on loopback;
+#   2. declares that route to the pi-ai adapter as an ordinary OpenAI-completions endpoint with
+#      explicit capabilities.
+#
+# It deliberately does NOT inherit the shipped web profile's `deepseek-official` default. Local use
+# must not require a DeepSeek account and must never silently fall back to a cloud model, so the
+# default model here is the local one and no cloud route is declared.
+- id: agent-default-model
+  name: "@deepseek-ai/dsh-agent-default-model"
+  config:
+    provider: strata-local
+    model: qwen3.8-flash-next
+
+- id: llm-pi-ai
+  name: "@deepseek-ai/dsh-llm-pi-ai"
+  # NOTE: the schema is `{ providers: { "<route>": <profile> } }` — a dict *keyed by route* under
+  # `providers`, not route keys at the top level. A top-level route key is silently ignored and the
+  # adapter then never registers, which surfaces much later as
+  # `no adapter registered for provider "<route>"`.
+  config:
+    providers:
+      strata-local:
+        displayName: Strata (local)
+        # An OpenAI-compatible dialect. `supportedProtocols()` in llm-pi-ai is
+        # openai-completions | openai-responses | anthropic-messages; the Strata worker implements
+        # the documented subsets of all three, and chat completions is the one exercised here.
+        api: openai-completions
+        baseURL: http://127.0.0.1:8095/v1
+        # The Strata worker does not require a key on loopback, but pi-ai's OpenAI-compatible
+        # client insists on one before it will send a request at all. Two things were tried and
+        # both fail before reaching the worker, which is worth recording:
+        #   * `apiKeyEnv: <NAME>` with the variable unset -> `no credential for provider route`
+        #   * naming no credential at all               -> `No API key for provider` (PI_AI_ERROR)
+        # A literal placeholder satisfies the client. It is NOT a secret, must never be treated as
+        # one, and is scoped to loopback by baseURL. If the worker is started with `--api-key`,
+        # this must become an `apiKeyEnv` credential reference instead.
+        headers:
+          Authorization: "Bearer strata-local"
+        compat:
+          # The worker's Chat Completions implementation is plain OpenAI; disable the provider
+          # conveniences pi-ai would otherwise assume.
+          supportsStore: false
+        models:
+          - id: qwen3.8-flash-next
+            name: Qwen3.8-Flash-Next (local)
+            # These are the *actual* limits the selected local profile reports, not catalog
+            # defaults. Setup recommends 32K below 96 GB unified memory and measures to 32K; see
+            # docs/MAC.md. Over-claiming here would let the agent build a request the engine
+            # refuses mid-turn.
+            contextWindow: 32768
+            # Sized against the *whole* request, not just the visible prompt: the Harness system
+            # prompt plus its tool definitions is already ~29K tokens of the 32K window, so an 8K
+            # output budget makes every turn fail with the worker's
+            # "request exceeds the context window ... requests are never truncated".
+            # The worker will not silently shrink a request, which is correct; the route must
+            # declare a budget that fits. The real-machine profile should either raise the engine's
+            # context (docs/MAC.md measures to 32K, and the model supports more) or set the engine
+            # config's `fit_max_tokens` so the server trims with a label rather than refusing.
+            maxTokens: 2048
+            input:
+              - text

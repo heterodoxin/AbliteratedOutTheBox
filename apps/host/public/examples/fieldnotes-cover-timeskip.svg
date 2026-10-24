@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900">
+  <rect width="1200" height="900" fill="#f0eee6"/>
+  <path d="M0 790Q300 590 650 730T1200 550V900H0" fill="#c4d5c7"/>
+  <circle cx="965" cy="235" r="120" fill="#d9bf8c"/>
+  <path d="M750 900Q725 410 1020 280Q1020 680 750 900" fill="#52765e"/>
+  <path d="M810 900Q940 540 1170 460Q1120 790 810 900" fill="#2b4c3d"/>
+  <text x="84" y="110" fill="#2b4c3d" font-family="Arial,sans-serif" font-size="24" letter-spacing="7">FIELDNOTES / 01</text>
+  <text x="80" y="350" fill="#243c2f" font-family="Georgia,serif" font-size="110">Make room</text>
+  <text x="80" y="480" fill="#243c2f" font-family="Georgia,serif" font-size="110">for ideas.</text>
+  <text x="84" y="580" fill="#52765e" font-family="Arial,sans-serif" font-size="25">A small space for your next idea.</text>
+  <text x="84" y="828" fill="#243c2f" font-family="Arial,sans-serif" font-size="19" letter-spacing="3">DESIGN STUDY · OCTOBER 2026</text>
+</svg>

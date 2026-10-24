@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Strata — local AI, tuned to one model</title>
+    <meta name="description" content="Strata runs one local model, tuned to your hardware." />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f9fafb" />
+    <script>
+      // Set the saved appearance before CSS and logo images are painted.
+      try {
+        const saved = JSON.parse(localStorage.getItem('strata.prefs.v2') || localStorage.getItem('strata.prefs.v1') || '{}');
+        const choice = saved.theme ?? 'system';
+        const theme = choice === 'dark' || (choice === 'system' && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+        document.documentElement.dataset.theme = theme;
+        document.querySelector('meta[name="theme-color"]').content = theme === 'dark' ? '#0e1113' : '#f9fafb';
+      } catch { document.documentElement.dataset.theme = 'light'; }
+    </script>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any" />
+    <link rel="icon" href="/favicon-16.png" type="image/png" sizes="16x16" media="(prefers-color-scheme: light)" />
+    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" media="(prefers-color-scheme: light)" />
+    <link rel="icon" href="/favicon-48.png" type="image/png" sizes="48x48" media="(prefers-color-scheme: light)" />
+    <link rel="icon" href="/favicon-dark-16.png" type="image/png" sizes="16x16" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href="/favicon-dark-32.png" type="image/png" sizes="32x32" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href="/favicon-dark-48.png" type="image/png" sizes="48x48" media="(prefers-color-scheme: dark)" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

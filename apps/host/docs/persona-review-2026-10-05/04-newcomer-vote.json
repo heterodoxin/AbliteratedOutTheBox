@@ -1,0 +1,102 @@
+{
+  "reviewer": "04",
+  "persona": "Woman trying Strata for the first time after hearing about it on TikTok",
+  "model": "gpt-6.1-sol",
+  "effort": "medium",
+  "votes": {
+    "B01": {
+      "choice": "YES",
+      "reason": "Remove repetition while keeping the short control meaning and clear configuration state."
+    },
+    "B02": {
+      "choice": "CONTEXT",
+      "reason": "Conversation length is understandable first; labelled Automatic or Custom keeps batch discoverable without demanding adjustment."
+    },
+    "B03": {
+      "choice": "MEMORY",
+      "reason": "Fit and memory answer the immediate setup question; speed samples belong in an explicit optional section."
+    },
+    "B04": {
+      "choice": "YES",
+      "reason": "One primary save action and an explicit available apply action clarify what happens next; secondary tools remain reachable."
+    },
+    "B05": {
+      "choice": "YES",
+      "reason": "Expert is a deliberate working view where recommendations and application scope help recovery; effects can be disclosed."
+    },
+    "B06": {
+      "choice": "SELECTOR",
+      "reason": "One selected recommendation follows a straightforward choice without comparing duplicate cards or decoding shared-winner chips."
+    },
+    "B07": {
+      "choice": "YES",
+      "reason": "The exact selected download must stay identifiable even when technical explanation is optional."
+    },
+    "B08": {
+      "choice": "FIT",
+      "reason": "Fit, memory and download cost are useful first-chat decisions; optional speed does not need to dominate ordinary cards."
+    },
+    "B09": {
+      "choice": "YES",
+      "reason": "A compact actionable no-fit state and one action for a shared winner prevent apparent dead ends and duplicate downloads."
+    },
+    "B10": {
+      "choice": "YES",
+      "reason": "Show what is already usable, keep Discover visible and respect a deliberate tab choice."
+    },
+    "B11": {
+      "choice": "YES",
+      "reason": "Aligned facts make an optional deliberate comparison easier than three repeated instrumentation panels."
+    },
+    "B12": {
+      "choice": "OPTIONAL",
+      "reason": "A required download and configuration review can contain optional tuning without making tuning a separate mandatory step."
+    },
+    "B13": {
+      "choice": "RENAME",
+      "reason": "Everyday work and Faster answers communicate the choice immediately; technical profile names remain available."
+    },
+    "B14": {
+      "choice": "YES",
+      "reason": "Compact detection and one exact recommendation let a first-time visitor review fit and download amount before commitment."
+    },
+    "B15": {
+      "choice": "YES",
+      "reason": "A real stage and specific recovery action explain waiting and failures; cancellation restart consequences must be visible."
+    },
+    "B16": {
+      "choice": "YES",
+      "reason": "Ready should lead directly to first chat with honest load or Demo status and optional technical depth."
+    },
+    "B17": {
+      "choice": "YES",
+      "reason": "Known lifecycle consequences matter when work exists; concise scope and real blockers prevent disruptive surprises."
+    },
+    "B18": {
+      "choice": "YES",
+      "reason": "One correctly scoped source label reduces repetition without losing evidence honesty or mixed-source distinctions."
+    },
+    "B19": {
+      "choice": "VISIBLE",
+      "reason": "A short actual review status prevents a starting recommendation being read as established capability."
+    },
+    "B20": {
+      "choice": "YES",
+      "reason": "Text-sample names distinguish speed testing from document support while preserving exact limits."
+    }
+  },
+  "top_three": [
+    "B08",
+    "B13",
+    "B14"
+  ],
+  "amendments": [
+    "Under B03 and B08, the Speed details trigger should expose a concise unavailable or illustrative status so discovery never implies a real benchmark. Any displayed demo numbers keep a local Demo label.",
+    "Under B06 SELECTOR, show a shared-winner note inside the selected recommendation and a direct Try Everyday work recovery for a no-fit tools profile. Choosing a profile does not start a download or load.",
+    "Under B12 OPTIONAL, keep an explicit download and configuration review visible before Prepare; optional tuning auto-opens for invalid retained values. Preserve completed choices and resume mapping when changing the step count.",
+    "Under B13, Faster answers states the ranking priority, not a promised measured speed; keep relevant capability and Provisional warnings visible.",
+    "Under B17, use operational counts only when reliable and relevant. A genuinely empty first setup needs no extra lifecycle confirmation, and unknown counts must never become zero.",
+    "Under B19, use actual review metadata in one short line; avoid listing hypothetical untested tasks or introducing a new capability score.",
+    "Retain current font sizes, focus handling, keyboard alternatives and errors. These votes are simulated design judgments, not evidence of real-user success."
+  ]
+}

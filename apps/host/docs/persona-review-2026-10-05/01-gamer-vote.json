@@ -1,0 +1,99 @@
+{
+  "reviewer": "01",
+  "persona": "PC gamer",
+  "model": "gpt-6.1-sol",
+  "effort": "medium",
+  "votes": {
+    "B01": {
+      "choice": "YES",
+      "reason": "Remove repetition while retaining concise control meaning and configuration state."
+    },
+    "B02": {
+      "choice": "TWO",
+      "reason": "Both dials expose tangible tuning tradeoffs; shorter hints solve the prose problem."
+    },
+    "B03": {
+      "choice": "RATES",
+      "reason": "Separate reading and answer ranges are useful feedback alongside memory fit."
+    },
+    "B04": {
+      "choice": "YES",
+      "reason": "Saving and applying deserve prominence; reset, validation and Demo preview remain reachable."
+    },
+    "B05": {
+      "choice": "YES",
+      "reason": "Dense expert rows should keep precise scope and recommendations, with optional descriptions."
+    },
+    "B06": {
+      "choice": "UNIQUE",
+      "reason": "Exact duplicate winners need one action; profile chips preserve their different priorities."
+    },
+    "B07": {
+      "choice": "YES",
+      "reason": "Exact variant identity is essential for a deliberate, reproducible choice."
+    },
+    "B08": {
+      "choice": "BOTH",
+      "reason": "Both labelled rates fit a compact row and expose different performance tradeoffs."
+    },
+    "B09": {
+      "choice": "YES",
+      "reason": "Compact no-fit recovery and shared-winner identity remove wasted height and duplicate actions."
+    },
+    "B10": {
+      "choice": "YES",
+      "reason": "Installed first supports daily management; remembered tabs preserve deliberate discovery."
+    },
+    "B11": {
+      "choice": "YES",
+      "reason": "Aligned facts make variant differences clearer than three repeated panels."
+    },
+    "B12": {
+      "choice": "OPTIONAL",
+      "reason": "Optional tuning in an explicit review preserves control and shortens the default path."
+    },
+    "B13": {
+      "choice": "KEEP",
+      "reason": "Short descriptors explain the established names without replacing technical profile terminology."
+    },
+    "B14": {
+      "choice": "YES",
+      "reason": "Compact facts and an explicit download review retain consequential information."
+    },
+    "B15": {
+      "choice": "YES",
+      "reason": "Actual progress and local recovery matter more than repeated stage narration."
+    },
+    "B16": {
+      "choice": "YES",
+      "reason": "Ready should lead to Chat; the illustrative test remains accessible in Setup details."
+    },
+    "B17": {
+      "choice": "YES",
+      "reason": "Known request blockers and global scope belong beside lifecycle actions."
+    },
+    "B18": {
+      "choice": "YES",
+      "reason": "One scoped source badge removes repetition without masking mixed evidence."
+    },
+    "B19": {
+      "choice": "VISIBLE",
+      "reason": "A short factual review-status line prevents speed from implying established capability."
+    },
+    "B20": {
+      "choice": "YES",
+      "reason": "Explicit text samples and token amounts describe the performance workload accurately."
+    }
+  },
+  "top_three": [
+    "B01",
+    "B06",
+    "B11"
+  ],
+  "amendments": [
+    "B02: keep a short batch hint that larger values may use more memory and are not always faster; no invented speed scale.",
+    "B06/B09: merge only identical exact variant and execution setups; preserve profile-specific rationales and a compact actionable no-fit state.",
+    "B17: show activity counts when relevant and known; put full lifecycle scope in confirmation rather than repeating idle operational prose.",
+    "B19: derive the visible review-status line from actual metadata; never invent task approval or treat Demo fixtures as production capability review."
+  ]
+}

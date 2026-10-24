@@ -1,0 +1,4 @@
+# dpct output that is not part of the port (tools/migrate.sh)
+dpct_report.*
+**/*.yaml
+migrate.log

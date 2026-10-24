@@ -1,0 +1,36 @@
+{
+  "reviewer": "07",
+  "persona": "Casual local AI research and ordinary work",
+  "model": "gpt-6.1-sol",
+  "effort": "medium",
+  "votes": {
+    "B01": { "choice": "YES", "reason": "Remove repetition while retaining one useful hint and truthful configuration state." },
+    "B02": { "choice": "CONTEXT", "reason": "Document context is the ordinary decision; labelled custom batch and Adjust preserve discovery." },
+    "B03": { "choice": "RATES", "reason": "Compact qualified reading and answer ranges provide immediate tuning feedback without the repeated timing story." },
+    "B04": { "choice": "YES", "reason": "Save and available Apply remain clear; less frequent actions can use a labelled menu with validation preserved." },
+    "B05": { "choice": "YES", "reason": "Show descriptions avoids repeated row disclosures for readers who need explanations while preserving Expert scope." },
+    "B06": { "choice": "UNIQUE", "reason": "One exact winner with profile chips prevents duplicate actions and keeps other winners and no-fit visible without selector exploration." },
+    "B07": { "choice": "YES", "reason": "Exact variant identity supports choosing and reproducing a setup; wrapping is preferable to opaque aliases." },
+    "B08": { "choice": "FIT", "reason": "Fit, working memory and download govern commitment; speed details and comparison remain available without suggesting suitability." },
+    "B09": { "choice": "YES", "reason": "Compact no-fit recovery and an explicit shared winner reduce redundant card height and download confusion." },
+    "B10": { "choice": "YES", "reason": "Installed-first daily access and remembered choice reduce repeated browsing while retaining Discover and exact variants." },
+    "B11": { "choice": "YES", "reason": "Aligned rows expose differences and per-variant evidence with much less repetition than three nested panels." },
+    "B12": { "choice": "OPTIONAL", "reason": "A preserved download/configuration review can contain optional tuning without another compulsory setup stop." },
+    "B13": { "choice": "RENAME", "reason": "Plain purposes make the three priorities easier to choose; canonical names remain accessible in Details." },
+    "B14": { "choice": "YES", "reason": "Compact detected facts, exact choice, fit and actual download amount retain the information needed before commitment." },
+    "B15": { "choice": "YES", "reason": "Stage-local recovery and visible cancellation consequences matter more than duplicated progress narration." },
+    "B16": { "choice": "YES", "reason": "Ready should confirm actual loaded or Demo state and lead directly to Chat with optional technical depth." },
+    "B17": { "choice": "YES", "reason": "Known shared-engine scope and consistent lifecycle blockers prevent disruption of ordinary ongoing work." },
+    "B18": { "choice": "YES", "reason": "A correctly scoped source badge removes repetition while local mixed, estimated and unknown states preserve meaning." },
+    "B19": { "choice": "VISIBLE", "reason": "One actual review-status line prevents a qualified starting recommendation from appearing to establish research suitability." },
+    "B20": { "choice": "YES", "reason": "Text sample labels retain exact token assumptions without implying document-format or research-task capability." }
+  },
+  "top_three": ["B02", "B06", "B11"],
+  "amendments": [
+    "B13: Explain long prompts in Tools and agents help; Faster answers names a priority, not a measured guarantee for this setup.",
+    "B19: Use existing capability-review metadata only; do not expand a general review into a verified research, accuracy or task-specific claim.",
+    "B03: Keep memory and fit visually prior to the compact rates; do not promote demo ranges into a hardware prediction.",
+    "B12: Auto-open optional tuning when retained values are invalid, showing their exact values and an explicit recovery action.",
+    "B06: Merge only the same exact variant and compatible displayed configuration; preserve separate priority rationales when winners coincide."
+  ]
+}

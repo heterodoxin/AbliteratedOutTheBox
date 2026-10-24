@@ -1,0 +1,27 @@
+IF MACOS WILL NOT OPEN IT ("damaged", "cannot be opened", "unidentified developer")
+----------------------------------------------------------------------------------
+Nothing is wrong with the file. macOS puts a "downloaded from the internet" mark (the quarantine flag) on everything a browser or
+Mail saves, and it only lets a marked program run if Apple has checked it. There are two kinds of build:
+
+* A NOTARISED build (Apple has checked it; Strata signs and notarises its release builds). It just opens:
+  double-click the .dmg, drag Strata onto Applications, open Strata. The first time, macOS says "Strata is an app downloaded from
+  the Internet. Are you sure you want to open it?" - press Open. That is the same for every app you download; there is nothing to
+  type and no setting to change. A notarised .zip of the Terminal works the same way: unzip it and run it.
+  To see which kind you have:      spctl -a -vv /Applications/Strata.app
+  A notarised build answers "accepted" and "source=Notarized Developer ID".
+
+* A build that is NOT notarised (a test build sent to you before it was signed, or one you built yourself). macOS may say
+  "Strata is damaged and can't be opened. You should move it to the Trash" or "Apple could not verify Strata is free of malware".
+  Do NOT move it to the Trash. The file is fine; you tell macOS once that you trust it by removing the download mark.
+  Open the Terminal app (Finder, Applications, Utilities, Terminal) and type ONE of these, matching what you have:
+
+      the .dmg file, before opening it:     xattr -dr com.apple.quarantine ~/Downloads/@APPIMAGE@
+      the app, after dragging it over:      xattr -dr com.apple.quarantine /Applications/Strata.app
+      an unzipped Terminal folder:          xattr -dr com.apple.quarantine <the folder you unzipped>
+
+  (If the file is somewhere other than Downloads, type the path to it; you can drag the file from Finder into the Terminal window to
+  write its path for you.) Then open it again as usual. If macOS only says "cannot be opened because the developer cannot be
+  verified" (not "damaged"), there is a second way without the Terminal: try to open it once, then System Settings > Privacy &
+  Security, scroll down to the message about Strata and press "Open Anyway".
+
+  Installs that use "curl ... | sh" never get the download mark, so they need none of this.

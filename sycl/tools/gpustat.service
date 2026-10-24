@@ -1,0 +1,10 @@
+[Unit]
+Description=Intel Arc telemetry sampler -> /run/gpustat.json (Strata's Monitor tab: GPU load and VRAM)
+
+[Service]
+ExecStart=/usr/bin/python3 -u /usr/local/sbin/gpustat.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

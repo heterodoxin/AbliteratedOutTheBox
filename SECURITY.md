@@ -1,106 +1,95 @@
-# Security Policy
-
- - [**Reporting a vulnerability**](#reporting-a-vulnerability)
- - [**Requirements**](#requirements)
- - [**Covered Topics**](#covered-topics)
- - [**Using llama.cpp securely**](#using-llamacpp-securely)
-   - [Untrusted models](#untrusted-models)
-   - [Untrusted inputs](#untrusted-inputs)
-   - [Data privacy](#data-privacy)
-   - [Untrusted environments or networks](#untrusted-environments-or-networks)
-   - [Multi-Tenant environments](#multi-tenant-environments)
+# Security
 
 ## Reporting a vulnerability
 
-> [!IMPORTANT]
-> The private security disclosure program is disabled until further notice. Please submit patches with fixes directly to the repo as public PRs. Emails will be ignored.
+Please report anything that should not be public until it is fixed **privately**, through GitHub's private
+vulnerability reporting: the repository's **Security** tab, **Report a vulnerability**
+([direct link](https://github.com/Niko1221/Strata/security/advisories/new)). Say what you found, how to reproduce it
+(the request, the config keys involved, the Strata version), and what an attacker gains. We answer there, fix it in
+a release, and credit you in the advisory unless you ask us not to.
 
-If you have discovered a security vulnerability in this project that falls inside the [covered topics](#covered-topics), please report it privately. **Do not disclose it as a public issue.** This gives us time to work with you to fix the issue before public exposure, reducing the chance that the exploit will be used before a patch is released.
+Ordinary hardening ideas and findings that are safe to discuss in public are welcome as an
+[issue](https://github.com/Niko1221/Strata/issues) (#544 collects audit findings) or as a pull request, which we
+review like our own code.
 
-Please disclose it as a private [security advisory](https://github.com/ggml-org/llama.cpp/security/advisories/new).
+Supported: the latest release. Fixes go into the next release, not into older ones.
 
-A team of volunteers on a reasonable-effort basis maintains this project. As such, please give us at least 90 days to work on a fix before public exposure.
+## What the server exposes
 
-### AI-powered code scan
+Strata runs a model on your PC and serves it over HTTP (`serve/server.py`). Out of the box it is reachable from
+this PC only. The details and every setting are in [docs/DETAILS.md](docs/DETAILS.md) ("From other devices",
+"Host names", "Web pages without an API key", "Tools from MCP servers").
 
-llama.cpp has an AI security scanner that scans the code periodically. The full prompts and tool set can be found in [ggml-org/security-scan-prompt](https://github.com/ggml-org/security-scan-prompt).
+- **Where it listens.** `127.0.0.1` by default. `--host 0.0.0.0` (or `"host"` in `strata-<model>.json`) opens it to
+  your network, and the server then warns when no API key is set.
+- **API key.** `"api_key"` in the run config (or `STRATA_API_KEY`) is required on `/v1/*` and on every endpoint
+  that shows the model's state, requests or answers (`/status`, `/metrics`, `/settings`, `/mcp`, `/props`, `/slots`,
+  `/api/requests`, `/config`) and on every `POST`. It is compared in constant time. Set one before you open the
+  server to your network or put a tunnel in front of it.
+- **Host check (DNS rebinding, 0.1.38).** Without an API key the server answers only requests whose `Host` is a name
+  it knows (`localhost`, an IP address, the address it listens on and, when it listens beyond this PC, this PC's
+  name). Others get 403. `"allowed_hosts"` adds names; with an API key the key decides.
+- **Origin check (0.1.38).** Without an API key, a browser `POST` to `/v1/*` from another web site's page (it carries
+  an `Origin` header) gets 403 unless that origin is Strata's own page, `localhost`, an allowed host, or listed in
+  `"trusted_origins"` / `"cors_origins"`. Changing settings (`/settings`, and `/config`: the few run config keys the
+  page's Model settings may change - never the network, key, MCP or program keys), `/load` and `/unload` and the
+  MCP tools are accepted only as JSON from Strata's own page (or `"trusted_origins"`), so a page elsewhere cannot
+  change settings or run tools.
+- **CORS** is off unless `"cors_origins"` lists origins, and then only for `/v1/*`.
+- **MCP tools** are opt-in: only the servers you put in the run config, only for requests from Strata's own page
+  that ask for them. They run with your user's rights, and the model decides when to call them.
+- **The request monitor** (`/api-monitor`, which keeps the last prompts and answers in memory) is off unless
+  `"api_monitor": true` is set. Apart from it, the server keeps in its process memory the text and tokens of its
+  last few prompts, whatever `"api_monitor"` says, to encode the next turn faster; no endpoint shows them, and they
+  are gone when the server stops.
 
-We greatly appreciate reports that reflect genuine research effort, and we are happy to spend our time reviewing them. Findings that an autonomous AI agent can surface on its own add little on top of the scans we already run.
+## The desktop app and the Terminal
 
-### Requirements
+Strata comes in three parts that share one engine: the **desktop app**, the **Terminal** (`strata`) and the **engine** that runs
+the model. The section above is about the engine's HTTP server. This is what the other two add.
 
-Before submitting your report, ensure you meet the following requirements:
+- **The app's host listens on this PC only.** The app serves its page from a local host process on `127.0.0.1` (port 8791 unless
+  changed). A request to its `/api/` endpoints that carries a browser `Origin` from any other site gets 403. The app shell holds a
+  random secret (32 characters or more, compared in constant time) that is needed to quit the host or tell it which window is open,
+  and the host gives its own helper processes a second random secret. By default the models the app starts are served on this PC only.
+- **Sharing is a separate, key-protected listener.** "Share with other devices" (and the Cloudflare tunnel) will not start until an
+  API key is set. It opens a different listener that answers only `/v1/models`, `/v1/chat/completions` and `/v1/messages`, never the
+  app's page or its host endpoints.
+- **App and Terminal talk through an owner channel.** One owner process per installation starts and ends the engine, and a second
+  client (the Terminal) attaches to it. On macOS and Linux that is a private Unix socket in a folder only you can open. On Windows it
+  is a TCP listener on `127.0.0.1` that answers only requests carrying a 256-bit token kept in an owner-only folder. That is a weaker
+  guarantee than a socket other users cannot open: on Windows the token is what protects it, as with any loopback service that has a
+  token (`strata_control/owner_transport.py`). The bridge between the app shell and the host (used for the app update) is also loopback and protected by a token.
+- **Starting a model and serving never download anything.** Downloads and updates are one explicit step: `strata update`, or "Update
+  engine" and "Update Strata" in the app's Settings. Models and saved tuning are never replaced by an update.
+- **Updates come from a signed feed.** The release publishes `strata-feed.json` and `strata-feed.json.sig` (Ed25519). An installed
+  Strata checks the signature against the public key it carries (`strata_control/update_keys.json`), refuses a feed older than the last
+  one it accepted (a replayed old feed) or expired, and checks every engine package against its SHA-256, its signed manifest and the
+  card in your PC before it test-starts it and switches to it. Any failure keeps the engine you had. The app installer itself is signed
+  with a separate key (Tauri's minisign key) that the app and the Terminal both check. The private keys are kept offline by the owner.
+  See [packaging/UPDATES.md](packaging/UPDATES.md).
 
-- You have read this policy and fully understand it.
-- You have searched for existing discussions of the issue. If it has already been reported, your report will likely be rejected as a duplicate.
-- AI is only permitted in an assistive capacity as stated in [AGENTS.md](AGENTS.md). We do not accept reports that are written exclusively by AI.
-- Your report must include a working Proof-of-Concept in the form of a script and/or attached files.
+### How far to trust `curl | sh` and `irm | iex`
 
-Maintainers reserve the right to close the report if these requirements are not fulfilled.
+The Terminal installs with one line:
 
-### Covered Topics
+```sh
+curl -fsSL https://github.com/Niko1221/Strata/releases/latest/download/install.sh | sh
+irm https://github.com/Niko1221/Strata/releases/latest/download/install.ps1 | iex
+```
 
-Only vulnerabilities that fall within these parts of the project are considered valid. For problems falling outside of this list, please report them as issues.
+Piping a script into a shell runs whatever the server sends, so it deserves the same care as running any downloaded program.
+What the script does is short and written at its top: it fetches the Terminal archive named in the release's `install-manifest.txt`,
+checks its SHA-256, unpacks it into your home folder (no administrator rights, nothing outside your home), checks the release's signed feed
+with the Terminal it just unpacked and removes it again if that fails, and puts `strata` on your PATH.
 
-- `src/**/*`
-- `ggml/**/*`
-- `gguf-py/**/*`
-- `tools/server/*`, **excluding** the following topics:
-    - Web UI
-    - Features marked as experimental
-    - Features not recommended for use in untrusted environments (e.g., router, MCP)
-    - Bugs that can lead to Denial-of-Service attack
+Those checks have a limit. The checksum comes from the same release as the archive, and the public key that checks the feed arrives inside
+that archive, so for the first install all trust rests on HTTPS and on the `Niko1221/Strata` GitHub release itself. The checks catch a
+damaged or half-finished download and a feed that was not signed by the release key; they do not protect you if the release has been replaced
+by someone who controls it. Later updates are checked against the key already on your PC, which is a stronger position.
 
-Note that none of the topics under [Using llama.cpp securely](#using-llamacpp-securely) are considered vulnerabilities in LLaMA C++.
+If that is not enough: save the script (`curl -fsSLO https://github.com/Niko1221/Strata/releases/latest/download/install.sh`), read it, and
+run it from the file; or install the desktop app or build from source instead and check the code you build.
 
-Denial-of-Service (DoS) bugs are generally not treated as vulnerabilities. We don't reject them outright, but we look at them case-by-case and only accept those that are genuinely worth fixing.
-
-For vulnerabilities that fall within the `vendor` directory, please report them directly to the third-party project.
-
-## Using llama.cpp securely
-
-### Untrusted models
-Be careful when running untrusted models. This classification includes models created by unknown developers or utilizing data obtained from unknown sources.
-
-*Always execute untrusted models within a secure, isolated environment such as a sandbox* (e.g., containers, virtual machines). This helps protect your system from potentially malicious code.
-
-> [!NOTE]
-> The trustworthiness of a model is not binary. You must always determine the proper level of caution depending on the specific model and how it matches your use case and risk tolerance.
-
-### Untrusted inputs
-
-Some models accept various input formats (text, images, audio, etc.). The libraries converting these inputs have varying security levels, so it's crucial to isolate the model and carefully pre-process inputs to mitigate script injection risks.
-
-For maximum security when handling untrusted inputs, you may need to employ the following:
-
-* Sandboxing: Isolate the environment where the inference happens.
-* Pre-analysis: Check how the model performs by default when exposed to prompt injection (e.g. using [fuzzing for prompt injection](https://github.com/FonduAI/awesome-prompt-injection?tab=readme-ov-file#tools)). This will give you leads on how hard you will have to work on the next topics.
-* Updates: Keep both LLaMA C++ and your libraries updated with the latest security patches.
-* Input Sanitation: Before feeding data to the model, sanitize inputs rigorously. This involves techniques such as:
-    * Validation: Enforce strict rules on allowed characters and data types.
-    * Filtering: Remove potentially malicious scripts or code fragments.
-    * Encoding: Convert special characters into safe representations.
-    * Verification: Run tooling that identifies potential script injections (e.g. [models that detect prompt injection attempts](https://python.langchain.com/docs/guides/safety/hugging_face_prompt_injection)).
-
-### Data privacy
-
-To protect sensitive data from potential leaks or unauthorized access, it is crucial to sandbox the model execution. This means running the model in a secure, isolated environment, which helps mitigate many attack vectors.
-
-### Untrusted environments or networks
-
-If you can't run your models in a secure and isolated environment or if it must be exposed to an untrusted network, make sure to take the following security precautions:
-* Do not use the RPC backend, [ggml-rpc-server](https://github.com/ggml-org/llama.cpp/tree/master/tools/rpc) and [llama-server](https://github.com/ggml-org/llama.cpp/tree/master/tools/server) functionality (see https://github.com/ggml-org/llama.cpp/pull/13061).
-* Confirm the hash of any downloaded artifact (e.g. pre-trained model weights) matches a known-good value.
-* Encrypt your data if sending it over the network.
-
-### Multi-Tenant environments
-
-If you intend to run multiple models in parallel with shared memory, it is your responsibility to ensure the models do not interact or access each other's data. The primary areas of concern are tenant isolation, resource allocation, model sharing and hardware attacks.
-
-1. Tenant Isolation: Models should run separately with strong isolation methods to prevent unwanted data access. Separating networks is crucial for isolation, as it prevents unauthorized access to data or models and malicious users from sending graphs to execute under another tenant's identity.
-
-2. Resource Allocation: A denial of service caused by one model can impact the overall system health. Implement safeguards like rate limits, access controls, and health monitoring.
-
-3. Model Sharing: In a multitenant model sharing design, tenants and users must understand the security risks of running code provided by others. Since there are no reliable methods to detect malicious models, sandboxing the model execution is the recommended approach to mitigate the risk.
-
-4. Hardware Attacks: GPUs or TPUs can also be attacked. [Researches](https://scholar.google.com/scholar?q=gpu+side+channel) has shown that side channel attacks on GPUs are possible, which can make data leak from other models or processes running on the same system at the same time.
+Strata has not had an outside security audit yet.
+What Strata downloads, when it uses the internet, what stays on your PC and how downloads are checked is written up in [docs/SAFETY.md](docs/SAFETY.md).

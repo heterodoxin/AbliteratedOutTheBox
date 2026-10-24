@@ -1,0 +1,35 @@
+# Strata on an Intel Arc card (A-series or B-series, including Arc Pro B70). Needs the xe or i915 kernel driver on the host.
+# The Level Zero loader and Intel's compute runtime are in the image (Ubuntu 26.04 based).
+#
+#   cp .env.example .env
+#   docker compose -f docker-compose.intel.yml up -d
+#
+# Images: ghcr.io/niko1221/strata (published from 0.2.1 on). To use one you built yourself: STRATA_IMAGE=strata:0.2.3-<flavor> docker compose up -d
+services:
+  strata:
+    image: ${STRATA_IMAGE:-ghcr.io/niko1221/strata:0.2.3-sycl}
+    container_name: strata
+    restart: unless-stopped
+    ports:
+      - "${STRATA_BIND:-127.0.0.1}:${STRATA_PORT:-8080}:8080"
+    environment:
+      MODEL: ${MODEL:-}
+      MODEL_PATH: ${MODEL_PATH:-}            # GGUF files you already have, as seen inside the container (mount them below)
+      CONTEXT: ${CONTEXT:-32k}
+      PARALLEL: ${PARALLEL:-}
+      VISION: ${VISION:-off}
+      TUNE: ${TUNE:-skip}
+      API_KEY: ${API_KEY:-}
+    volumes:
+      - strata-data:/data
+      # - /srv/gguf/IQ3_XXS:/models:ro
+    devices:
+      - /dev/dri:/dev/dri
+    group_add:
+      - "${RENDER_GID:-render}"              # the host's render group id: getent group render | cut -d: -f3 (needed if you add `user:`)
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+    shm_size: 2gb
+    stop_grace_period: 2m
+volumes:
+  strata-data:

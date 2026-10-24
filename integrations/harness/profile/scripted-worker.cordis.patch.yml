@@ -1,0 +1,20 @@
+# A TEST-ONLY overlay for the scripted Strata worker, layered over the product profile
+# (`cordis.patch.yml`) by `tool_flow_e2e.py --patch` order. It is not part of the shipped profile and
+# nothing but that test applies it: the product profile must keep answering title requests.
+#
+# It exists because a *scripted* model is not a model. The worker replays a fixed list of scripts, one
+# per request, so which reply a request receives depends on how many requests came before it -- and a
+# sequence written by hand is only meaningful if the Harness sends exactly the requests the script
+# author planned for.
+#
+# The session-title provider does not: on the first prompt it fires its own chat-completions request,
+# before the turn's model call. The worker answers that request with the first script, so a
+# two-script sequence meaning "call the bash tool, then report" is consumed as "title, report": the
+# tool call is never emitted, the turn completes normally, and the run looks exactly like a model that
+# chose not to use a tool. That is a silent, plausible-looking failure -- the worst kind -- and it is
+# why this overlay disables the provider rather than adding a script.
+#
+# The deterministic first-prompt fallback title (`session-title`) stays enabled, so sessions are still
+# named from their first message; only the extra model request is gone.
+- id: session-title-llm
+  disabled: true

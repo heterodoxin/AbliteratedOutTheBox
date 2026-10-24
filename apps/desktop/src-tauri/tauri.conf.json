@@ -1,0 +1,76 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Strata",
+  "identifier": "ai.strata.desktop",
+  "build": {
+    "frontendDist": "../../host/dist"
+  },
+  "app": {
+    "withGlobalTauri": false,
+    "windows": [],
+    "security": {
+      "csp": null,
+      "dangerousDisableAssetCspModification": false
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": [
+      "dmg",
+      "app",
+      "nsis",
+      "appimage",
+      "deb"
+    ],
+    "icon": [
+      "icons/icon.png",
+      "icons/icon.ico"
+    ],
+    "category": "DeveloperTool",
+    "shortDescription": "Local AI, tuned to one model.",
+    "longDescription": "Strata runs one local model, tuned to your machine. Desktop and Terminal share the same model inventory, profiles, runtime and agent sessions.",
+    "resources": {
+      "../../host/dist": "host/dist",
+      "../../host/server": "host/server",
+      "../../host/package.json": "host/package.json",
+      "resources/node": "node",
+      "resources/control": "control",
+      "resources/harness": "harness",
+      "resources/engine-bundle": "engine-bundle"
+    },
+    "linux": {
+      "appimage": {
+        "bundleMediaFramework": true
+      }
+    },
+    "macOS": {
+      "minimumSystemVersion": "15.0",
+      "entitlements": "entitlements.plist"
+    },
+    "createUpdaterArtifacts": false,
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser",
+      "template": "nsis/installer.nsi",
+      "headerImage": "nsis/header.bmp",
+      "sidebarImage": "nsis/sidebar.bmp",
+      "installerIcon": "icons/icon.ico",
+        "compression": "lzma",
+        "languages": [
+          "English"
+        ]
+      }
+    }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEI2QjA5OTk5MDU1MjFGNUUKUldSZUgxSUZtWm13dHNGRU40N2xOUjdZZGpvcGl0NTB2WGxnS3VTc2RlakpSbnBxUkxndHNFY0oK",
+      "endpoints": [
+        "https://github.com/Niko1221/Strata/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
+    }
+  }
+}

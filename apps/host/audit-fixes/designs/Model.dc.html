@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+@font-face{font-family:'GT Walsheim Pro';src:url('fonts/GTWalsheimPro-Regular.woff2') format('woff2');font-weight:400;font-display:swap;}
+@font-face{font-family:'GT Walsheim Pro';src:url('fonts/GTWalsheimPro-Medium.woff2') format('woff2');font-weight:500;font-display:swap;}
+@font-face{font-family:'GT Walsheim Pro';src:url('fonts/GTWalsheimPro-Bold.woff2') format('woff2');font-weight:700;font-display:swap;}
+@font-face{font-family:'GT Walsheim Pro';src:url('fonts/GTWalsheimPro-Black.woff2') format('woff2');font-weight:900;font-display:swap;}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:#f9fafb;}
+a{color:#0c8a60;text-decoration:none;}
+a:hover{text-decoration:underline;}
+details>summary::-webkit-details-marker{display:none;}
+</style>
+</helmet>
+<div style="min-height:100vh;background:#f9fafb;color:#221e1f;font-family:'GT Walsheim Pro',system-ui,sans-serif;-webkit-font-smoothing:antialiased;padding-bottom:80px;">
+
+  <header style="display:flex;align-items:center;gap:16px;padding:16px 32px;background:#ffffff;border-bottom:1px solid #dee5ee;">
+    <div style="display:flex;flex-direction:column;gap:4px;">
+      <h1 style="margin:0;font-weight:700;font-size:24px;letter-spacing:-0.01em;">Model</h1>
+      <span style="font-size:13px;color:#6f6f6f;">One model, tuned for your PC. Pick the version that fits.</span>
+    </div>
+  </header>
+
+  <main style="max-width:1200px;margin:0 auto;padding:28px 28px 0;display:flex;flex-direction:column;gap:28px;">
+
+    <section style="display:flex;flex-wrap:wrap;align-items:center;gap:24px;padding:24px;background:#ffffff;border:1px solid #dee5ee;border-radius:24px;box-shadow:0 4px 4px rgba(0,0,0,.03),0 1px 2px rgba(0,0,0,.04);">
+      <div style="flex:1 1 420px;min-width:0;display:flex;gap:18px;align-items:flex-start;">
+        <span style="display:flex;align-items:center;justify-content:center;flex:none;width:64px;height:64px;border-radius:18px;background:#f9fafb;border:1px solid #eeeeee;"><img src="brand/logo/strata-mark-light.svg" width="40" height="40" alt=""/></span>
+        <div style="display:flex;flex-direction:column;gap:10px;min-width:0;">
+          <h2 style="margin:0;font-weight:900;font-size:30px;line-height:1.05;letter-spacing:-0.02em;">Qwen3.8-Flash-Next</h2>
+          <p style="margin:0;max-width:560px;font-size:15px;line-height:1.55;color:#303030;">The one model Strata is built around. It's a mixture of experts: 30B parameters in total, but only 3B work on each word, so it runs fast on a home PC.</p>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;">
+            <span style="display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 11px;border-radius:999px;background:#f7f7f7;border:1px solid #dee5ee;font-size:12px;font-weight:500;color:#303030;"><span style="display:inline-block;width:14px;height:14px;background:#2F384C;mask:url(icons/layers.svg) center/contain no-repeat;"></span>30B total · 3B active</span>
+            <span style="display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 11px;border-radius:999px;background:#f7f7f7;border:1px solid #dee5ee;font-size:12px;font-weight:500;color:#303030;"><span style="display:inline-block;width:14px;height:14px;background:#2F384C;mask:url(icons/chat.svg) center/contain no-repeat;"></span>Up to 1M context</span>
+            <span style="display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 11px;border-radius:999px;background:#f7f7f7;border:1px solid #dee5ee;font-size:12px;font-weight:500;color:#303030;"><span style="display:inline-block;width:14px;height:14px;background:#2F384C;mask:url(icons/tool.svg) center/contain no-repeat;"></span>Text · code · tools</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="flex:0 1 380px;min-width:280px;display:flex;flex-direction:column;gap:14px;padding:18px;border-radius:18px;background:#f9fafb;border:1px solid #eeeeee;">
+        <sc-if value="{{ heroSwitching }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <span style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#0c8a60;"><span style="width:7px;height:7px;border-radius:50%;background:#10b981;"></span>Loading</span>
+            <span style="font-weight:700;font-size:18px;">{{ switchName }}</span>
+            <div style="height:6px;border-radius:999px;background:#eef1f4;overflow:hidden;"><div style="{{ switchBar }}height:100%;border-radius:999px;background:#10b981;"></div></div>
+            <span style="font-size:12px;color:#6f6f6f;">{{ switchStep }}</span>
+          </div>
+        </sc-if>
+        <sc-if value="{{ heroRunning }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <span style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#0c8a60;"><span style="width:7px;height:7px;border-radius:50%;background:#10b981;box-shadow:0 0 0 4px #d1fae5;"></span>Running</span>
+              <span style="font-weight:700;font-size:18px;">{{ runName }}</span>
+              <code style="font-family:ui-monospace,Consolas,monospace;font-size:12px;color:#6f6f6f;">{{ runQuant }}</code>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;">
+              <span style="font-weight:900;font-size:30px;line-height:1;font-variant-numeric:tabular-nums;">{{ runSpeed }}</span>
+              <span style="font-size:12px;color:#6f6f6f;">tok/s</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <a href="Engine v3.dc.html" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;height:40px;border:1.5px solid #dee5ee;border-radius:14px;background:#ffffff;color:#221e1f;font:700 14px 'GT Walsheim Pro',sans-serif;text-decoration:none;" style-hover="background:#f7f7f7;text-decoration:none;"><span style="display:inline-block;width:16px;height:16px;background:#2F384C;mask:url(icons/gauge.svg) center/contain no-repeat;"></span>Tune engine</a>
+            <button onClick="{{ unload }}" style="flex:1;height:40px;border:1.5px solid #dee5ee;border-radius:14px;background:#ffffff;color:#221e1f;font:700 14px 'GT Walsheim Pro',sans-serif;cursor:pointer;" style-hover="background:#f7f7f7;">Unload</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{ heroIdle }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <span style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#6f6f6f;"><span style="width:7px;height:7px;border-radius:50%;background:#c9d1db;"></span>Not loaded</span>
+            <span style="font-size:14px;line-height:1.45;color:#303030;">Nothing is using your graphics card right now.</span>
+          </div>
+          <button onClick="{{ loadRec }}" style="height:42px;border:0;border-radius:14px;background:#10b981;color:#ffffff;font:700 14px 'GT Walsheim Pro',sans-serif;cursor:pointer;box-shadow:0 6px 16px rgba(16,185,129,.24);" style-hover="background:#0c8a60;">{{ loadRecLabel }}</button>
+        </sc-if>
+      </div>
+    </section>
+
+    <section style="display:flex;flex-direction:column;gap:16px;">
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <h2 style="margin:0;font-weight:700;font-size:22px;letter-spacing:-0.01em;">Choose a version</h2>
+          <span style="font-size:14px;line-height:1.5;color:#6f6f6f;max-width:640px;">Same model, packed at different sizes. Smaller versions are faster and use less memory; bigger ones are a little more precise.</span>
+        </div>
+        <span style="display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 12px;border-radius:999px;background:#ffffff;border:1px solid #dee5ee;font-size:13px;font-weight:500;color:#303030;"><span style="display:inline-block;width:16px;height:16px;background:#2F384C;mask:url(icons/gpu.svg) center/contain no-repeat;"></span>{{ hwLabel }}</span>
+      </div>
+
+      <div style="background:#ffffff;border:1px solid #dee5ee;border-radius:24px;padding:20px 20px 16px;display:flex;flex-direction:column;gap:14px;box-shadow:0 4px 4px rgba(0,0,0,.03),0 1px 2px rgba(0,0,0,.04);">
+        <div style="display:flex;flex-wrap:wrap;gap:16px;font-size:12px;font-weight:500;color:#303030;">
+          <span style="display:flex;align-items:center;gap:8px;"><span style="width:12px;height:12px;border-radius:4px;background:#ecfdf5;border:1.5px solid #10b981;"></span>Fast on your PC</span>
+          <span style="display:flex;align-items:center;gap:8px;"><span style="width:12px;height:12px;border-radius:4px;background:#fff6e0;border:1.5px solid #e39b0b;"></span>Works, but slower</span>
+          <span style="display:flex;align-items:center;gap:8px;"><span style="width:12px;height:12px;border-radius:4px;background:repeating-linear-gradient(45deg,#eef1f4 0 3px,#f7f7f7 3px 6px);border:1.5px solid #c9d1db;"></span>Too big for your PC</span>
+        </div>
+        <div style="overflow-x:auto;margin:0 -4px;padding:4px;">
+          <div style="display:grid;grid-template-columns:repeat(7,minmax(112px,1fr));gap:0;min-width:784px;">
+            <sc-for list="{{ quants }}" as="q" hint-placeholder-count="7">
+              <button onClick="{{ q.select }}" style="{{ q.colStyle }}position:relative;display:flex;flex-direction:column;align-items:center;gap:10px;padding:12px 6px 16px;border:0;cursor:pointer;font-family:'GT Walsheim Pro',sans-serif;text-align:center;transition:background 160ms,box-shadow 160ms;">
+                <span style="{{ q.zoneBar }}position:absolute;left:0;right:0;top:0;height:3px;"></span>
+                <span style="{{ q.conStyle }}position:absolute;top:57px;height:2px;background:#dee5ee;"></span>
+                <span style="height:22px;display:flex;align-items:center;">
+                  <sc-if value="{{ q.isRec }}" hint-placeholder-val="{{ false }}"><span style="display:inline-flex;align-items:center;height:22px;padding:0 9px;border-radius:999px;background:#221e1f;color:#ffffff;font-size:11px;font-weight:700;">Recommended</span></sc-if>
+                </span>
+                <span style="{{ q.node }}position:relative;z-index:1;display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;box-sizing:border-box;transition:transform 160ms;"><span style="{{ q.nodeInner }}display:inline-block;"></span></span>
+                <span style="display:flex;flex-direction:column;align-items:center;gap:3px;">
+                  <span style="font-weight:700;font-size:14px;color:#221e1f;">{{ q.name }}</span>
+                  <code style="font-family:ui-monospace,Consolas,monospace;font-size:11px;color:#6f6f6f;">{{ q.id }}</code>
+                </span>
+                <span style="display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;font-variant-numeric:tabular-nums;">
+                  <span style="color:#303030;">{{ q.sizeLabel }}</span>
+                  <span style="{{ q.speedStyle }}font-weight:700;">{{ q.speedLabel }}</span>
+                </span>
+                <span style="height:18px;font-size:11px;font-weight:700;color:#0c8a60;">{{ q.stateTag }}</span>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:500;color:#6f6f6f;padding:0 6px;">
+          <span>← Smaller and faster</span><span>More precise →</span>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-wrap:wrap;gap:20px;padding:24px;background:#ffffff;border:1px solid #dee5ee;border-radius:24px;box-shadow:0 4px 4px rgba(0,0,0,.03),0 1px 2px rgba(0,0,0,.04);">
+        <div style="flex:1 1 520px;min-width:0;display:flex;flex-direction:column;gap:18px;">
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+            <h3 style="margin:0;font-weight:700;font-size:22px;">{{ sel.name }}</h3>
+            <code style="font-family:ui-monospace,Consolas,monospace;font-size:13px;color:#6f6f6f;">{{ sel.id }}</code>
+            <span style="{{ sel.chipStyle }}display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:700;"><span style="width:6px;height:6px;border-radius:50%;background:currentColor;"></span>{{ sel.chip }}</span>
+          </div>
+          <p style="margin:0;font-size:15px;line-height:1.55;color:#303030;max-width:640px;">{{ sel.blurb }}</p>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;">
+            <div style="display:flex;flex-direction:column;gap:8px;padding:14px;border-radius:16px;background:#f7f7f7;">
+              <span style="font-size:12px;font-weight:500;color:#6f6f6f;">Quality</span>
+              <span style="font-weight:900;font-size:24px;line-height:1;font-variant-numeric:tabular-nums;">{{ sel.quality }}<span style="font-weight:500;font-size:13px;color:#6f6f6f;">% of original</span></span>
+              <div style="height:6px;border-radius:999px;background:#e3e8ee;overflow:hidden;"><div style="{{ sel.qualityBar }}height:100%;border-radius:999px;background:#2F384C;"></div></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;padding:14px;border-radius:16px;background:#f7f7f7;">
+              <span style="font-size:12px;font-weight:500;color:#6f6f6f;">Writing speed</span>
+              <span style="font-weight:900;font-size:24px;line-height:1;font-variant-numeric:tabular-nums;">{{ sel.speed }}<span style="font-weight:500;font-size:13px;color:#6f6f6f;"> tok/s</span></span>
+              <div style="height:6px;border-radius:999px;background:#e3e8ee;overflow:hidden;"><div style="{{ sel.speedBar }}height:100%;border-radius:999px;"></div></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;padding:14px;border-radius:16px;background:#f7f7f7;">
+              <span style="font-size:12px;font-weight:500;color:#6f6f6f;">Download size</span>
+              <span style="font-weight:900;font-size:24px;line-height:1;font-variant-numeric:tabular-nums;">{{ sel.size }}<span style="font-weight:500;font-size:13px;color:#6f6f6f;"> GB</span></span>
+              <span style="font-size:12px;color:#6f6f6f;">{{ sel.diskNote }}</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;padding:14px;border-radius:16px;background:#f7f7f7;">
+              <span style="font-size:12px;font-weight:500;color:#6f6f6f;">Memory needed</span>
+              <span style="font-weight:900;font-size:24px;line-height:1;font-variant-numeric:tabular-nums;">{{ sel.need }}<span style="font-weight:500;font-size:13px;color:#6f6f6f;"> GB</span></span>
+              <div style="display:flex;gap:2px;height:6px;border-radius:999px;background:#e3e8ee;overflow:hidden;"><div style="{{ sel.memGpu }}height:100%;background:#10b981;"></div><div style="{{ sel.memSys }}height:100%;background:#2F384C;"></div><div style="{{ sel.memOver }}height:100%;background:repeating-linear-gradient(45deg,#e0283f 0 3px,#f37a89 3px 6px);"></div></div>
+              <span style="font-size:12px;color:#6f6f6f;font-variant-numeric:tabular-nums;">{{ sel.memNote }}</span>
+            </div>
+          </div>
+          <details style="border-top:1px solid #eeeeee;padding-top:14px;">
+            <summary style="list-style:none;display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:700;color:#303030;">Technical details<span style="display:inline-block;width:14px;height:14px;background:#6f6f6f;mask:url(icons/chevron.svg) center/contain no-repeat;"></span></summary>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px 24px;margin-top:12px;font-family:ui-monospace,Consolas,monospace;font-size:12px;color:#303030;">
+              <span style="display:flex;justify-content:space-between;gap:10px;"><span style="color:#6f6f6f;">bits / weight</span><span>{{ sel.bits }}</span></span>
+              <span style="display:flex;justify-content:space-between;gap:10px;"><span style="color:#6f6f6f;">perplexity vs BF16</span><span>{{ sel.ppl }}</span></span>
+              <span style="display:flex;justify-content:space-between;gap:10px;"><span style="color:#6f6f6f;">experts in VRAM</span><span>{{ sel.expertsVram }}</span></span>
+              <span style="display:flex;justify-content:space-between;gap:10px;"><span style="color:#6f6f6f;">file</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ sel.file }}</span></span>
+            </div>
+          </details>
+        </div>
+
+        <div style="flex:0 1 280px;min-width:240px;display:flex;flex-direction:column;justify-content:center;gap:10px;padding:20px;border-radius:18px;background:#f9fafb;border:1px solid #eeeeee;">
+          <sc-if value="{{ act.running }}" hint-placeholder-val="{{ false }}">
+            <span style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;color:#0c8a60;"><span style="display:inline-block;width:18px;height:18px;background:#10b981;mask:url(icons/check.svg) center/contain no-repeat;"></span>This version is running</span>
+            <span style="font-size:13px;line-height:1.45;color:#6f6f6f;">All chats use it. Tune speed and memory on the Engine page.</span>
+            <button onClick="{{ unload }}" style="height:42px;border:1.5px solid #dee5ee;border-radius:14px;background:#ffffff;color:#221e1f;font:700 14px 'GT Walsheim Pro',sans-serif;cursor:pointer;" style-hover="background:#f7f7f7;">Unload</button>
+          </sc-if>
+          <sc-if value="{{ act.installed }}" hint-placeholder-val="{{ false }}">
+            <span style="font-weight:700;font-size:15px;">Downloaded and ready</span>
+            <span style="font-size:13px;line-height:1.45;color:#6f6f6f;">{{ act.switchNote }}</span>
+            <button onClick="{{ act.switchTo }}" style="{{ act.btnState }}height:44px;border:0;border-radius:14px;background:#10b981;color:#ffffff;font:700 14px 'GT Walsheim Pro',sans-serif;cursor:pointer;box-shadow:0 6px 16px rgba(16,185,129,.24);" style-hover="background:#0c8a60;">Switch to this version</button>
+            <button onClick="{{ act.remove }}" style="{{ act.btnState }}display:flex;align-items:center;justify-content:center;gap:8px;height:38px;border:0;border-radius:12px;background:transparent;color:#b01a2e;font:700 13px 'GT Walsheim Pro',sans-serif;cursor:pointer;" style-hover="background:#fdecee;"><span style="display:inline-block;width:15px;height:15px;background:currentColor;mask:url(icons/trash.svg) center/contain no-repeat;"></span>Delete · frees {{ sel.size }} GB</button>
+          </sc-if>
+          <sc-if value="{{ act.downloading }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;justify-content:space-between;font-size:13px;font-variant-numeric:tabular-nums;"><span style="font-weight:700;">Downloading</span><span style="color:#6f6f6f;">{{ act.dlPct }}%</span></div>
+            <div style="height:8px;border-radius:999px;background:#eef1f4;overflow:hidden;"><div style="{{ act.dlBar }}height:100%;border-radius:999px;background:#10b981;transition:width 120ms linear;"></div></div>
+            <span style="font-size:12px;color:#6f6f6f;font-variant-numeric:tabular-nums;">{{ act.dlNote }}</span>
+            <button onClick="{{ act.cancel }}" style="height:38px;border:1.5px solid #dee5ee;border-radius:12px;background:#ffffff;color:#221e1f;font:700 13px 'GT Walsheim Pro',sans-serif;cursor:pointer;" style-hover="background:#f7f7f7;">Cancel</button>
+          </sc-if>
+          <sc-if value="{{ act.available }}" hint-placeholder-val="{{ true }}">
+            <span style="font-weight:700;font-size:15px;">Not downloaded yet</span>
+            <span style="font-size:13px;line-height:1.45;color:#6f6f6f;">{{ act.availNote }}</span>
+            <button onClick="{{ act.download }}" style="display:flex;align-items:center;justify-content:center;gap:8px;height:44px;border:0;border-radius:14px;background:#10b981;color:#ffffff;font:700 14px 'GT Walsheim Pro',sans-serif;cursor:pointer;box-shadow:0 6px 16px rgba(16,185,129,.24);" style-hover="background:#0c8a60;"><span style="display:inline-block;width:16px;height:16px;background:#ffffff;mask:url(icons/download.svg) center/contain no-repeat;"></span>Download · {{ sel.size }} GB</button>
+          </sc-if>
+          <sc-if value="{{ act.tooBig }}" hint-placeholder-val="{{ false }}">
+            <span style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;color:#b01a2e;"><span style="display:inline-block;width:18px;height:18px;background:currentColor;mask:url(icons/warning.svg) center/contain no-repeat;"></span>Too big for this PC</span>
+            <span style="font-size:13px;line-height:1.45;color:#6f6f6f;">{{ act.bigNote }}</span>
+            <button onClick="{{ act.pickRec }}" style="height:42px;border:1.5px solid #dee5ee;border-radius:14px;background:#ffffff;color:#221e1f;font:700 14px 'GT Walsheim Pro',sans-serif;cursor:pointer;" style-hover="background:#f7f7f7;">See the recommended one</button>
+          </sc-if>
+        </div>
+      </div>
+    </section>
+
+    <section style="display:flex;flex-direction:column;gap:14px;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+        <h2 style="margin:0;font-weight:700;font-size:22px;letter-spacing:-0.01em;">On this PC</h2>
+        <span style="font-size:13px;color:#6f6f6f;font-variant-numeric:tabular-nums;">{{ storageLabel }}</span>
+      </div>
+      <div style="background:#ffffff;border:1px solid #dee5ee;border-radius:20px;padding:8px;box-shadow:0 4px 4px rgba(0,0,0,.03),0 1px 2px rgba(0,0,0,.04);">
+        <sc-for list="{{ installedRows }}" as="row" hint-placeholder-count="2">
+          <div style="{{ row.style }}display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:14px 16px;border-radius:14px;">
+            <span style="{{ row.dot }}flex:none;width:10px;height:10px;border-radius:50%;"></span>
+            <div style="flex:1 1 220px;min-width:0;display:flex;flex-direction:column;gap:2px;">
+              <span style="font-weight:700;font-size:15px;">{{ row.name }} <code style="font-family:ui-monospace,Consolas,monospace;font-weight:400;font-size:12px;color:#6f6f6f;margin-left:6px;">{{ row.id }}</code></span>
+              <span style="font-size:13px;color:#6f6f6f;font-variant-numeric:tabular-nums;">{{ row.meta }}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <sc-if value="{{ row.canSwitch }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ row.switchTo }}" style="height:36px;padding:0 14px;border:1.5px solid #dee5ee;border-radius:12px;background:#ffffff;color:#221e1f;font:700 13px 'GT Walsheim Pro',sans-serif;cursor:pointer;" style-hover="background:#f7f7f7;">Switch</button>
+                <button onClick="{{ row.remove }}" title="Delete" style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;border:0;border-radius:10px;background:transparent;cursor:pointer;" style-hover="background:#fdecee;"><span style="display:inline-block;width:16px;height:16px;background:#6f6f6f;mask:url(icons/trash.svg) center/contain no-repeat;"></span></button>
+              </sc-if>
+              <sc-if value="{{ row.isRunning }}" hint-placeholder-val="{{ false }}">
+                <span style="display:inline-flex;align-items:center;height:26px;padding:0 10px;border-radius:999px;background:#ecfdf5;color:#0c8a60;font-size:12px;font-weight:700;">Running</span>
+              </sc-if>
+              <sc-if value="{{ row.isDl }}" hint-placeholder-val="{{ false }}">
+                <span style="font-size:12px;font-weight:700;color:#303030;font-variant-numeric:tabular-nums;">{{ row.dlPct }}%</span>
+              </sc-if>
+            </div>
+          </div>
+        </sc-for>
+        <div style="display:flex;flex-direction:column;gap:8px;padding:14px 16px 12px;margin-top:4px;border-top:1px solid #eeeeee;">
+          <div style="display:flex;height:8px;border-radius:999px;background:#eef1f4;overflow:hidden;"><div style="{{ storageBar }}height:100%;border-radius:999px;background:#2F384C;transition:width 300ms;"></div></div>
+          <span style="font-size:12px;color:#6f6f6f;font-variant-numeric:tabular-nums;">{{ storageNote }}</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;right:24px;bottom:24px;display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:14px;background:#ffffff;border:1px solid #dee5ee;box-shadow:0 10px 40px rgba(15,23,42,.08),0 1px 3px rgba(15,23,42,.06);font-size:14px;z-index:40;">
+      <span style="display:inline-block;width:20px;height:20px;background:#10b981;mask:url(icons/check.svg) center/contain no-repeat;"></span>
+      <span style="display:flex;flex-direction:column;gap:2px;"><span style="font-weight:700;">{{ toastTitle }}</span><span style="color:#6f6f6f;">{{ toastSub }}</span></span>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;hardware&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;this&quot;,&quot;laptop&quot;,&quot;workstation&quot;],&quot;default&quot;:&quot;this&quot;,&quot;tsType&quot;:&quot;'this'|'laptop'|'workstation'&quot;}}">
+const Q = [
+  ['Q2_K', 'Smallest', 2.9, 90.8, '+9.1%', 96],
+  ['Q3_K_M', 'Compact', 3.9, 95.4, '+3.8%', 90],
+  ['Q4_K_M', 'Balanced', 4.9, 98.1, '+1.2%', 84],
+  ['Q5_K_M', 'High quality', 5.7, 99.0, '+0.5%', 78],
+  ['Q6_K', 'Very high', 6.6, 99.5, '+0.2%', 72],
+  ['Q8_0', 'Near-original', 8.5, 99.9, '+0.04%', 64],
+  ['BF16', 'Original', 16, 100, '0', 50],
+].map(([id, name, bits, quality, ppl, base]) => ({ id, name, bits, quality, ppl, base, size: +(30.5 * bits / 8).toFixed(1) }));
+const HW = {
+  this: { label: 'RTX 4070 · 12 GB · 32 GB RAM', vram: 12, ram: 32, disk: 1000, used: 588 },
+  laptop: { label: 'RTX 4060 Laptop · 8 GB · 16 GB RAM', vram: 8, ram: 16, disk: 512, used: 401 },
+  workstation: { label: 'RTX 4090 · 24 GB · 64 GB RAM', vram: 24, ram: 64, disk: 2000, used: 910 },
+};
+
+class Component extends DCLogic {
+  state = { running: 'Q4_K_M', installed: ['Q4_K_M', 'Q3_K_M'], selected: null, dl: {}, switching: null, toast: null };
+  componentWillUnmount() { (this.timers || []).forEach(clearInterval); clearTimeout(this.tt); }
+  hw() { return HW[this.props.hardware ?? 'this'] || HW.this; }
+  fit(q) {
+    const hw = this.hw(), vAvail = hw.vram * 0.92, cap = vAvail + hw.ram * 0.6, need = +(q.size + 2.5).toFixed(1);
+    if (need > cap) return { zone: 'none', need, gpuPart: Math.min(need, vAvail), sysPart: Math.max(0, cap - vAvail), over: need - cap, speed: 0, cap };
+    const frac = vAvail / need, speed = q.base * (0.35 + 0.65 * Math.min(1, frac * 1.3));
+    return { zone: speed >= 60 ? 'fast' : 'slow', need, gpuPart: Math.min(need, vAvail), sysPart: Math.max(0, need - vAvail), over: 0, speed, cap, onGpu: Math.min(100, Math.round(frac * 100)) };
+  }
+  rec() {
+    const fits = Q.map(q => [q, this.fit(q)]).filter(([, f]) => f.zone !== 'none');
+    const fast = fits.filter(([, f]) => f.zone === 'fast');
+    if (fast.length) return fast[fast.length - 1][0].id;
+    if (fits.length) return fits[0][0].id;
+    return Q[0].id;
+  }
+  toastMsg(t, s) { this.setState({ toast: { t, s } }); clearTimeout(this.tt); this.tt = setTimeout(() => this.setState({ toast: null }), 3000); }
+  download(id) {
+    if (this.state.dl[id] != null) return;
+    this.setState(s => ({ dl: { ...s.dl, [id]: 0 } }));
+    const iv = setInterval(() => {
+      const p = (this.state.dl[id] ?? 0) + 1.6 + Math.random() * 1.4;
+      if (this.state.dl[id] == null) { clearInterval(iv); return; }
+      if (p >= 100) { clearInterval(iv); this.setState(s => { const dl = { ...s.dl }; delete dl[id]; return { dl, installed: [...s.installed, id] }; }); this.toastMsg('Download complete', `${Q.find(q => q.id === id).name} is ready to use.`); return; }
+      this.setState(s => ({ dl: { ...s.dl, [id]: p } }));
+    }, 120);
+    (this.timers ||= []).push(iv);
+  }
+  cancel(id) { this.setState(s => { const dl = { ...s.dl }; delete dl[id]; return { dl }; }); }
+  switchTo(id) {
+    if (this.state.switching) return;
+    const steps = ['Unloading the current version…', 'Loading weights from disk…', 'Moving experts to the graphics card…', 'Warming up…'];
+    this.setState({ switching: { to: id, p: 0 } });
+    const iv = setInterval(() => {
+      const p = this.state.switching.p + 2.6;
+      if (p >= 100) { clearInterval(iv); this.setState({ running: id, switching: null }); const q = Q.find(x => x.id === id); this.toastMsg('Now running ' + q.name, `${this.fit(q).speed.toFixed(0)} tok/s on this PC.`); return; }
+      this.setState({ switching: { to: id, p, step: steps[Math.min(3, Math.floor(p / 25))] } });
+    }, 60);
+    (this.timers ||= []).push(iv);
+  }
+  remove(id) { if (id === this.state.running) return; this.setState(s => ({ installed: s.installed.filter(x => x !== id) })); this.toastMsg('Version deleted', `${Q.find(q => q.id === id).size} GB freed.`); }
+
+  renderVals() {
+    const s = this.state, hw = this.hw(), recId = this.rec();
+    const selId = s.selected ?? s.running ?? recId;
+    const zoneCol = { fast: ['#f3fcf8', '#10b981'], slow: ['#fffaf0', '#e39b0b'], none: ['repeating-linear-gradient(45deg,#f4f6f8 0 4px,#fafbfc 4px 8px)', '#c9d1db'] };
+    const quants = Q.map((q, i) => {
+      const f = this.fit(q), sel = q.id === selId, inst = s.installed.includes(q.id), run = q.id === s.running, dl = s.dl[q.id] != null;
+      const [bg, zc] = zoneCol[f.zone];
+      const node = run ? 'background:#10b981;border:0;box-shadow:0 0 0 5px #d1fae5;' : inst ? 'background:#2F384C;border:0;' : f.zone === 'none' ? 'background:#ffffff;border:2px dashed #c9d1db;' : 'background:#ffffff;border:2px solid #2F384C;';
+      return {
+        id: q.id, name: q.name, sizeLabel: q.size + ' GB',
+        speedLabel: f.zone === 'none' ? 'Won\u2019t fit' : f.speed.toFixed(0) + ' tok/s',
+        speedStyle: f.zone === 'none' ? 'color:#9aa3ab;' : f.zone === 'slow' ? 'color:#8a5a00;' : 'color:#0c8a60;',
+        stateTag: run ? 'Running' : dl ? `Downloading ${Math.floor(s.dl[q.id])}%` : inst ? 'Downloaded' : '',
+        isRec: q.id === recId,
+        select: () => this.setState({ selected: q.id }),
+        colStyle: (sel ? 'background:#ffffff;box-shadow:0 0 0 2px #221e1f inset,0 10px 24px rgba(15,23,42,.10);border-radius:16px;z-index:2;' : `background:${bg};`) + (i === 0 && !sel ? 'border-radius:14px 0 0 14px;' : '') + (i === Q.length - 1 && !sel ? 'border-radius:0 14px 14px 0;' : ''),
+        zoneBar: `background:${zc};` + (sel ? 'left:14px;right:14px;border-radius:0 0 3px 3px;' : '') + (i === 0 ? 'border-top-left-radius:14px;' : '') + (i === Q.length - 1 ? 'border-top-right-radius:14px;' : ''),
+        conStyle: i === 0 ? 'left:50%;right:0;' : i === Q.length - 1 ? 'left:0;right:50%;' : 'left:0;right:0;',
+        node: node + (sel ? 'transform:scale(1.15);' : ''),
+        nodeInner: run || inst ? 'width:8px;height:8px;border-radius:50%;background:#ffffff;' : 'width:0;height:0;',
+      };
+    });
+    const q = Q.find(x => x.id === selId), f = this.fit(q), run = q.id === s.running, inst = s.installed.includes(q.id), dl = s.dl[q.id];
+    const qualityTxt = q.quality >= 99.5 ? 'Practically identical to the original.' : q.quality >= 98 ? 'Hard to tell apart from the original in everyday use.' : q.quality >= 95 ? 'Slightly less precise on hard reasoning and code.' : 'Noticeably less precise. Best when memory is very tight.';
+    const fitTxt = f.zone === 'none' ? `It needs about ${f.need} GB of memory, and this PC has about ${f.cap.toFixed(0)} GB free for models.` : f.sysPart < 0.05 ? 'Runs entirely on your graphics card, the fastest way to run it.' : f.zone === 'fast' ? 'Most of it runs on your graphics card. Rarely used experts sit in system memory, so it\u2019s still fast.' : 'It fits, but more of it lives in slower system memory, so replies come noticeably slower.';
+    const total = Math.max(f.need, f.cap), pw = v => `width:${(v / total * 100).toFixed(1)}%;`;
+    const freeDisk = hw.disk - hw.used - s.installed.reduce((a, id) => a + Q.find(x => x.id === id).size, 0);
+    const chip = run ? ['Running', 'background:#ecfdf5;color:#0c8a60;'] : dl != null ? ['Downloading', 'background:#e8f4ff;color:#0668c2;'] : inst ? ['Downloaded', 'background:#f7f7f7;color:#303030;'] : f.zone === 'none' ? ['Too big', 'background:#fdecee;color:#b01a2e;'] : q.id === recId ? ['Recommended', 'background:#221e1f;color:#ffffff;'] : ['Available', 'background:#f7f7f7;color:#303030;'];
+    const runQ = Q.find(x => x.id === s.running), swQ = s.switching && Q.find(x => x.id === s.switching.to);
+    const modelGb = s.installed.reduce((a, id) => a + Q.find(x => x.id === id).size, 0);
+    const dlLeft = dl != null ? (q.size * (1 - dl / 100)) : 0;
+
+    return {
+      hwLabel: 'Checked for ' + hw.label,
+      heroSwitching: !!s.switching, heroRunning: !s.switching && !!s.running, heroIdle: !s.switching && !s.running,
+      switchName: swQ ? `${swQ.name} · ${swQ.id}` : '', switchBar: `width:${s.switching?.p ?? 0}%;transition:width 60ms linear;`, switchStep: s.switching?.step ?? 'Unloading the current version…',
+      runName: runQ?.name ?? '', runQuant: runQ ? runQ.id + ' · ' + runQ.size + ' GB' : '', runSpeed: runQ ? this.fit(runQ).speed.toFixed(0) : '',
+      unload: () => { this.setState({ running: null }); this.toastMsg('Model unloaded', 'Your graphics card is free.'); },
+      loadRec: () => { const id = s.installed.includes(recId) ? recId : s.installed[0]; if (id) this.switchTo(id); },
+      loadRecLabel: 'Load ' + (Q.find(x => x.id === (s.installed.includes(recId) ? recId : s.installed[0]))?.name ?? 'model'),
+      quants,
+      sel: {
+        id: q.id, name: q.name, chip: chip[0], chipStyle: chip[1],
+        blurb: qualityTxt + ' ' + fitTxt,
+        quality: q.quality.toFixed(1), qualityBar: `width:${((q.quality - 85) / 15 * 100).toFixed(1)}%;`,
+        speed: f.zone === 'none' ? '—' : f.speed.toFixed(0),
+        speedBar: `width:${(f.speed / 96 * 100).toFixed(1)}%;background:${f.zone === 'slow' ? '#e39b0b' : '#10b981'};`,
+        size: q.size, diskNote: inst ? 'Already on this PC' : `${freeDisk.toFixed(0)} GB free on disk`,
+        need: f.need, memGpu: pw(f.gpuPart), memSys: pw(f.sysPart), memOver: pw(f.over),
+        memNote: f.zone === 'none' ? `${f.over.toFixed(1)} GB more than this PC has` : f.sysPart < 0.05 ? `All ${f.need} GB on graphics card` : `${f.gpuPart.toFixed(1)} GB graphics card + ${f.sysPart.toFixed(1)} GB system`,
+        bits: q.bits.toFixed(1), ppl: q.ppl, expertsVram: f.zone === 'none' ? '—' : (f.onGpu ?? 100) + '%', file: `qwen3.8-flash-next-${q.id}.gguf`,
+      },
+      act: {
+        running: run, installed: inst && !run && dl == null, downloading: dl != null, available: !inst && dl == null && f.zone !== 'none', tooBig: !inst && dl == null && f.zone === 'none',
+        switchNote: s.running ? `Switching takes about 5 seconds. Your chats stay open.` : 'Load it to start chatting.',
+        switchTo: () => this.switchTo(q.id), remove: () => this.remove(q.id), btnState: s.switching ? 'opacity:.5;pointer-events:none;' : '',
+        dlPct: dl != null ? Math.floor(dl) : 0, dlBar: `width:${dl ?? 0}%;`, dlNote: dl != null ? `${(q.size - dlLeft).toFixed(1)} of ${q.size} GB · 112 MB/s · about ${Math.max(1, Math.round(dlLeft * 1024 / 112 / 60))} min left` : '',
+        cancel: () => this.cancel(q.id), download: () => this.download(q.id),
+        availNote: f.zone === 'fast' ? `Fits well on this PC. You'll be able to switch to it as soon as it's downloaded.` : 'It will run, but slower than the recommended version.',
+        bigNote: `It needs about ${f.need} GB and this PC has about ${f.cap.toFixed(0)} GB. A PC with more graphics or system memory could run it.`,
+        pickRec: () => this.setState({ selected: recId }),
+      },
+      installedRows: [...s.installed, ...Object.keys(s.dl)].map(id => {
+        const qq = Q.find(x => x.id === id), ff = this.fit(qq), isRun = id === s.running, isDl = s.dl[id] != null;
+        return {
+          id, name: qq.name, isRunning: isRun, isDl, canSwitch: !isRun && !isDl, dlPct: isDl ? Math.floor(s.dl[id]) : 0,
+          meta: `${qq.size} GB on disk · ${qq.quality}% quality · ${ff.zone === 'none' ? 'won\u2019t fit' : ff.speed.toFixed(0) + ' tok/s'}${isDl ? ' · downloading' : ''}`,
+          dot: isRun ? 'background:#10b981;box-shadow:0 0 0 4px #d1fae5;' : isDl ? 'background:#0f97ff;' : 'background:#2F384C;',
+          style: id === selId ? 'background:#f7f7f7;' : '',
+          switchTo: () => this.switchTo(id), remove: () => this.remove(id),
+        };
+      }),
+      storageLabel: `${modelGb.toFixed(1)} GB of model files`,
+      storageBar: `width:${((hw.used + modelGb) / hw.disk * 100).toFixed(1)}%;`,
+      storageNote: `${freeDisk.toFixed(0)} GB free of ${hw.disk >= 1000 ? (hw.disk / 1000) + ' TB' : hw.disk + ' GB'} · models use ${modelGb.toFixed(1)} GB`,
+      toast: !!s.toast, toastTitle: s.toast?.t ?? '', toastSub: s.toast?.s ?? '',
+    };
+  }
+}
+</script>
+</body>
+</html>

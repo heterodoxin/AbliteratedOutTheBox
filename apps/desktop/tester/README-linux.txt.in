@@ -1,0 +1,72 @@
+STRATA FOR LINUX - TESTER BUILD (Strata @APP_VERSION@)
+=====================================================
+
+This is a test version of the Strata desktop app for Linux. The AI engine is already inside the file, so there is nothing to
+install for it and no engine to download. Only the AI model itself is downloaded (from Hugging Face), when you pick one.
+Please keep this file to yourself: it is not a public release.
+
+File:    @APPIMAGE@   (about @SIZE_GB:@APPIMAGE@@ GB)
+Checks:  sha256 @SHA256:@APPIMAGE@@
+         To check your copy:   sha256sum @APPIMAGE@   - the long number must be the same.
+
+
+WHAT YOU NEED
+-------------
+* Ubuntu 22.04 or newer (22.04, 24.04 and 26.04 are what it was built for), or Fedora 44. 64-bit, on a normal desktop session.
+* An NVIDIA graphics card, RTX 20 series or newer (built and checked for RTX 30 cards; the RTX 40 and RTX 50 series are inside too).
+  If the computer also has AMD or Intel graphics (for example a Ryzen with built-in graphics), Strata ignores them and uses the NVIDIA card.
+* The NVIDIA driver, version 580.65 or newer (the CUDA 13 engine in this file needs it).
+  To see yours, open a terminal and type:   nvidia-smi    - the number next to "Driver Version" is it.
+  If the driver is older, Strata tells you in one line which version to install. To install a newer one:
+    Ubuntu:  open "Software & Updates" > "Additional Drivers", or run:  sudo ubuntu-drivers install   and restart.
+    Fedora:  use the NVIDIA driver from RPM Fusion (akmod-nvidia), and  sudo dnf install xorg-x11-drv-nvidia-cuda  so that nvidia-smi exists.
+* 32 GB of RAM or more is best (the model list shows what fits your computer).
+* Disk: about 3 GB for the app and its engine, plus 40 to 70 GB for each model you download.
+* FUSE 2 (libfuse2). Ubuntu 26.04 does not have it by default; install it once:
+      Ubuntu 22.04:   sudo apt install libfuse2          Ubuntu 24.04 / 26.04:   sudo apt install libfuse2t64
+  (or skip it by running the file with  --appimage-extract-and-run , see "IF IT DOES NOT START" below).
+
+
+START IT
+--------
+1. Save the file somewhere you can find it, for example your Downloads folder.
+2. Make it runnable. Either right-click the file > Properties > Permissions > "Allow executing file as program",
+   or in a terminal:
+       chmod +x @APPIMAGE@
+3. Double-click it, or start it from a terminal (a terminal also shows messages if something goes wrong):
+       ./@APPIMAGE@
+
+The very first start takes about a minute longer: the engine that came with the app is unpacked into your home folder
+(~/.local/share/strata). Later starts are quick. Then open the Models page, pick a model and press the install button.
+A model download is big; it carries on where it stopped if it is interrupted.
+
+Closing the window stops Strata and the engine. (In browser mode closing the tab does not: see BROWSER MODE below.)
+To stop a running Strata from a terminal:   ./@APPIMAGE@ --quit
+
+
+@INCLUDE:common-troubleshoot.txt@
+
+
+PLEASE TELL US ABOUT THE WINDOW
+-------------------------------
+This is one of the first times the Linux window runs on real graphics desktops. In your report please say:
+  - which Linux and which desktop (for example "Ubuntu 26.04, GNOME, Wayland" or "Fedora 44, GNOME, Wayland"),
+  - your graphics card and driver version (nvidia-smi),
+  - whether the Strata window showed up and worked: yes / opened in the browser instead / blank / closed by itself,
+  - for a blank or closed window: what you typed (any of the lines above) and what changed.
+If you started it from a terminal, copy what it printed there.
+
+
+WHAT TO SEND BACK
+-----------------
+Open  Settings > Engine > Diagnostics > View logs > Save logs.  Send the saved file, plus a few words about what you did and what you saw
+(a photo of the screen is fine).
+If the window crashed or would not open, the app window is not available for that: run   ./@APPIMAGE@ --save-logs   in a terminal instead.
+It writes strata-logs-<date>.txt in your Downloads folder (including the crash log of the window); send that file.
+
+
+WHERE THINGS ARE (to remove Strata completely, delete the file and these folders)
+--------------------------------------------------------------------------------
+  ~/.strata                      settings, chats, prepared model files
+  ~/.local/share/strata          the unpacked engine, and logs/ (what the app printed, and a crash log if the window ever crashes)
+  ~/Documents/Strata             downloaded models (Models) and your work folder (Workspace)

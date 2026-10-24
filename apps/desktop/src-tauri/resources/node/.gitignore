@@ -1,0 +1,6 @@
+# The private Node runtime is a build input, not source.
+#
+# It is a 117 MB platform binary that would bloat every clone and cannot be reviewed in a diff.
+# `packaging/README.md` and `apps/desktop/scripts/fetch-node.sh` record exactly how to obtain it:
+# the official nodejs.org build for the target, verified against its published SHA-256.
+/node

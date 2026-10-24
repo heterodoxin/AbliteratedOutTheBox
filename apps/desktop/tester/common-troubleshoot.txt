@@ -1,0 +1,42 @@
+IF IT DOES NOT START
+--------------------
+* A message about "FUSE" or "libfuse.so.2". AppImages need FUSE 2, and Ubuntu 26.04 does not install it any more
+  (this is what happens on a fresh Ubuntu 26.04: "dlopen(): error loading libfuse.so.2"). Install it once:
+      Ubuntu 22.04:               sudo apt install libfuse2
+      Ubuntu 24.04 and 26.04:     sudo apt install libfuse2t64
+      Fedora:                     sudo dnf install fuse fuse-libs
+      CachyOS / Arch:             sudo pacman -S fuse2
+  Then start it again. Without FUSE you can still run it, a little slower to start because it unpacks itself first:
+      ./@APPIMAGE@ --appimage-extract-and-run
+* The app window does not open, or it closes by itself. This build does not give up: Strata keeps running and opens in your web
+  browser instead ("browser mode"). You will see a notification and, in a terminal, this line:
+      Strata opened in your browser because the app window couldn't start on this computer.
+  The terminal also says  "The app window crashed (signal 11 ...)"  and where the crash log is. Everything works in the browser tab except
+  updating the app itself (see BROWSER MODE below). Please tell us it happened, with your Linux, desktop and graphics driver, and run
+      ./@APPIMAGE@ --save-logs
+  which puts the crash log and the other logs into one file in your Downloads folder (it needs no window). Send us that file.
+  A crash during the very first start does not stop the engine's unpacking: Strata keeps working in the browser.
+* The window opens but stays blank or white: this build already switches off WebKit's DMA-BUF drawing, which is the usual cause.
+  If it is still blank, try these one at a time, and tell us which one (if any) helped:
+      WEBKIT_DISABLE_COMPOSITING_MODE=1 ./@APPIMAGE@
+      GDK_BACKEND=x11 ./@APPIMAGE@
+      WEBKIT_DISABLE_DMABUF_RENDERER=1 ./@APPIMAGE@
+  or just use browser mode (next section).
+* Inside a virtual machine or a remote desktop without graphics acceleration the window may be blank or may close at once.
+  Run Strata on the computer's own desktop, not through a remote session.
+
+
+BROWSER MODE (Strata in your web browser instead of the app window)
+------------------------------------------------------------------
+Start it on purpose with:
+      ./@APPIMAGE@ --browser          (or:  STRATA_UI=browser ./@APPIMAGE@)
+Strata starts its engine and opens http://127.0.0.1:47831/ in your default browser. The address works on your own computer only; nothing is
+reachable from the network.
+* Closing the browser tab does NOT stop Strata or its engine, because the tab is only a view. To stop everything, use the menu
+  (the "More" entry at the bottom left) > "Quit Strata", or in a terminal:      ./@APPIMAGE@ --quit
+* Starting the AppImage again while Strata runs does not start a second copy: it opens another tab (browser mode) or brings the window forward.
+* What works in a browser tab as in the window: chat, models, Monitor, Settings, choosing a folder (a folder dialog needs zenity or kdialog;
+  without one Strata asks you to type the folder path), "open file" and "show in folder" (Strata opens them for you), downloads, the assistant.
+* What does NOT work in browser mode: updating the app itself (Settings > Updates says so in plain words; the engine updates still work and
+  you can update the app by starting it from its icon without --browser), and the app window's own title bar and window buttons (your
+  browser has its own). There is no desktop notification from the page itself; Strata sends the one it needs.

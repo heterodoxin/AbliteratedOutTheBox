@@ -1,0 +1,6 @@
+{
+ "tl01": "Use a simple server name of up to 32 characters: letters, numbers, hyphens or underscores.",
+ "tl02": "These tool servers were left out because their names are not allowed: {0}. A name can have up to 32 letters, numbers, hyphens or underscores.",
+ "tl03": "These tool servers were left out because they have no program or web address: {0}.",
+ "tl04": "These tool servers were left out because another one has almost the same name: {0}."
+}
