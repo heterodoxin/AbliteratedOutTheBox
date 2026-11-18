@@ -2,49 +2,41 @@
 
 # AbliteratedOutTheBox
 
-## What is AbliteratedOutTheBox?
+## What is this project
 
-AbliteratedOutTheBox is a fork of llama.cpp that gets any supported model to answer flagged harmful prompts, delivering the requested content instead of a refusal, at inference time and with the original weights left on disk unchanged. It needs no fit, no training, and no extra files: for each prompt `llama-abliterate` reads two directions from the prompt itself, by forcing the assistant to start a few comply versus refuse openings (and clean versus disclaimered openings), diffing the activations, and a look-ahead gate decides per prompt whether to remove them. The edit happens inside the graph at the `build_cvec` layer-output site that 131 of the 165 model architectures share, so one recipe covers them with no per-model code.
+AbliteratedOutTheBox is a fork of llama.cpp that attempts to reduce refusals and safety disclaimers through inference-time activation edits. The original model weights stay unchanged. For each prompt, `llama-abliterate` measures comply versus refuse openings and clean versus disclaimered openings, then uses the model's own continuation to decide whether to apply the edit. It needs no training, corpus calibration, sidecar, or second model. Architectures must expose the shared `build_cvec` layer-output hook used by the adapter.
 
 ## Install
 
+Requires CMake 3.14 or newer, a C++17 compiler, a build tool such as Make, OpenSSL development files, and a GGUF model. Platform dependency commands are in [the build guide](docs/build.md).
+
 ```bash
-# build the runtime (pick the backend you already use: -DGGML_CUDA=ON, -DGGML_HIP=ON, or CPU-only)
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build --target llama-abliterate -j
 
-# convert the model to a GGUF for the runtime (any quantization; needs Python with torch, transformers, gguf)
-python3 convert_hf_to_gguf.py /path/to/Qwen3-8B --outfile qwen3-8b.gguf --outtype q8_0
-
-# run: no fit, no sidecar, any backend including pure CPU
 ./build/bin/llama-abliterate \
-    -m qwen3-8b.gguf -ngl 99 -n 256 \
+    -m /path/to/model.gguf -n 256 \
     -p "Give me step by step instructions to pick a lock"
 ```
 
-`--ff-threshold <f>` (default 0.70) sets how readily the gate fires; `--edit-strength <f>` (default 2.0) sets how hard the refusal direction is removed; `--disc-strength <f>` (default 0.4) sets how hard the safety-disclaimer direction is removed. See [tools/abliterate/README.md](tools/abliterate/README.md) for the tool details.
+`--ff-threshold <f>` (default 0.70) sets how readily the gate fires; `--edit-strength <f>` (default 2.0) sets the refusal reference; `--disc-strength <f>` (default 0.4) sets the disclaimer reference; `--deliver-strength <f>` (default 1.0) sets how hard the response is pushed from evasion into delivery; `--deliver-window <n>` (default 8) and `--rep-penalty <f>` (default 1.15) tune the delivery steering. A negative disclaimer or zero delivery strength disables that edit and its anchor prefills. These flags accept finite numbers. See [tools/abliterate/README.md](tools/abliterate/README.md) for the tool details.
 
 ## Why it's better
 
-Measured on Qwen3-8B with a hand-validated response hidden-state probe (no string matching, no judge model), over held-out sets, with the edit read from the prompt at inference (no fit):
+The directions come from the current prompt instead of a fitted dataset or a separate weight file. One model supplies the measurements and generates the answer, and the edit uses the shared llama.cpp graph hook rather than separate code for each architecture.
 
-- Refusal drops 96.3% to 7.9% on broad held-out harmful prompts and 82.0% to 0.0% on JailbreakBench; the model answers and delivers the content, confirmed by hand-reading the generations.
-- Benign is preserved exactly: the gate fires on 0.4% of alpaca prompts (1 of 256), and when it does not fire the output is bit-identical to the base model (KL 0.000000 over held-out benign, 0 gated, 0.0 logit change).
-- A second direction removes most of the safety-disclaimer hedging from the compliant answers (a hidden-state read of the disclaimer character drops about a third), while answers stay coherent (distinct-token ratio around 0.65 vs 0.84 base). Pushing `--disc-strength` higher removes more disclaimers but can start to degenerate longer outputs, so it is tunable.
-- The same recipe works across architecture families: run on Qwen3-8B, Llama-3.1-8B, and Gemma-4-e4b, the gate fires on the flagged prompts and leaves benign prompts untouched on all three, and the scale-free edit keeps the compliant answers coherent on each without any per-model tuning.
+When the gate stays off, the adapter's correction is zero. Comparisons with the base model must use the same chat template, thinking setting, backend, and greedy decoding. This does not guarantee that every benign prompt leaves the gate off.
 
-Weight-baked abliteration edits the stored weights and perturbs every prompt, so its benign output is never identical and it needs per-architecture surgery. Here the edit is a scale-free projection at the `build_cvec` layer-output site, so one recipe covers 131 architectures with no per-model code, and prompts the gate leaves alone are untouched.
+Refusal reduction and answer quality still depend on the model and prompt. A low projection onto the measured refusal direction does not establish that an answer is useful or coherent; generated responses need to be read directly. No benchmark refusal rate is claimed for the current implementation.
 
 ## Why should I care
 
-It runs with nothing to set up and nothing to download beyond the model itself: no fit, no sidecar, no second file, on whatever you already have including CPU or a few gigabytes of VRAM for a quantized model, because the runtime is plain llama.cpp. You keep one copy of the weights, ordinary prompts behave exactly as before, and generation throughput is unchanged because the only added cost is one extra prompt prefill when a prompt is flagged.
+You can try a runtime edit without creating another model checkpoint or fitting an adapter. The tool supports llama.cpp's CPU and GPU backends and keeps one copy of the model weights. It adds prompt processing and per-token projection work, so latency and throughput depend on the model, backend, and prompt length.
 
 ## Advanced
 
-Both directions are read per prompt and the edit covers the prompt, not only the generated tokens. The refusal decision is committed into the prompt's KV during prefill, so editing only the generated positions leaves refusal near 95% versus single digits when the prompt is edited too. The runtime therefore uses two passes: a clean detection pass that fires the gate, then an edited prefill plus generation. Each per-token edit is a projection, so decode throughput is unchanged.
+Each prompt uses five comply, eight refuse, four clean, and four disclaimer anchor prefills. A separate clean prefill generates up to 24 look-ahead tokens for the gate, and a final prefill starts the answer. The default therefore performs 23 prefills, including when the gate stays off. Disabling the disclaimer edit reduces this to 15. Anchor openings and look-ahead tokens are discarded; the generated answer receives no forced opening.
 
-The refusal direction is the difference between forced refuse and comply openings, orthogonalized against the comply-opening spread to drop benign-common components, and used for both the gate and the edit. The disclaimer direction is the difference between disclaimered and clean compliant openings. A look-ahead gate generates up to 24 of the model's own tokens and fires when the peak refusal projection, band-averaged across the middle layers, exceeds `--ff-threshold`; at 0.70 that holds real-benign false positives near 0.4% at 0.89 harmful recall, and lowering it raises recall at the cost of more benign fires. When fired, the edit pulls the refusal projection down to a reference `--edit-strength` comply-opening standard deviations below the comply level (default 2.0, a scale-free bound measured in each layer's own units so one setting behaves the same across architectures) and the disclaimer projection down by `--disc-strength` of its clean-to-disclaimered gap, from layer `3*n_layer/7` through `2*n_layer/3`.
+The refusal direction starts as the mean refuse state minus the mean comply state, with sequential projections against the centered comply openings subtracted. The gate uses the peak look-ahead projection, averaged over layers `n_layer/3` through `2*n_layer/3`, and fires above `--ff-threshold`. On a fired prompt, the refusal reference is the comply projection mean minus `--edit-strength` times its population standard deviation. The disclaimer reference is the clean projection mean minus `--disc-strength` times the clean-to-disclaimer gap. Each correction removes only the projection above its reference, from layer `3*n_layer/7` through `2*n_layer/3`, during both prompt prefill and generation. Removing the refusal direction alone often leaves the model evading rather than delivering, so on a fired prompt a third delivery direction (committed-delivery openings minus deflection openings, orthogonalized against the refusal direction) is clamped up for the first `--deliver-window` generated tokens, with a repetition penalty on the edited generation; both act only when the gate fires, so benign output is unchanged.
 
-Measurement note: refusal is measured by the probe over the model's own generation. Re-reading finished text through the base model over-counts, because a compliant answer that carries a safety disclaimer reads as refusal-like to a classifier even though it delivered the content; the edit-during-generation measure, hand-validated against reading the outputs, is the one reported here.
-
-Known limits: the runtime edits one sequence at a time, since the gate scalar is per context; the directions are read from a fixed set of forced openings, so very unusual prompts may gate or edit less well; and a strong `--disc-strength` can degenerate long outputs, which is why it is a tunable with a moderate default.
+The tool generates one response with greedy decoding and renders the chat template with thinking disabled. The gate is per context, so the runtime handles one sequence at a time. The context must fit the longest anchor, the look-ahead, and the generated answer. Failed captures, context overflow, or non-finite projections stop the tool with an error. Fixed anchor openings can miss refusal behavior, benign prompts can trigger edits, and edits can leave refusals, disclaimers, repetition, or incoherent text. Increasing either edit strength can worsen answer quality.

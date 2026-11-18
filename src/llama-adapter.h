@@ -45,24 +45,27 @@ using llama_adapter_cvec_ptr = std::shared_ptr<llama_adapter_cvec>;
 // llama_adapter_abliterate
 //
 
-// inference-time abliteration: per-prompt refusal and disclaimer directions read at runtime and removed at the layer-output site when the gate fires.
+// inference-time abliteration: per-prompt refusal, disclaimer, and delivery directions read at runtime, the first two removed and the third clamped up at the layer-output site when the gate fires.
 struct llama_adapter_abliterate {
     int32_t n_layer    = 0;
     int32_t n_embd     = 0;
     int32_t edit_start = 0;
+    float   deliver_strength = 1.5f;
 
-    // apply the gated two-direction edit at the layer-output site (scaled by the runtime gate tensor)
+    // apply the gated edit at the layer-output site (refusal and disclaimer removed, delivery clamped up early)
     ggml_tensor * apply_to(ggml_context * ctx, ggml_tensor * cur, int il) const;
 
     bool init(const llama_model & model);
-    void set_active(bool fired);  // set the runtime gate scalar to 1 or 0
-    void set_direction(int layer, const float * r, float ceil, const float * r2, float ceil2);
+    void set_active(bool fired);     // set the refusal/disclaimer gate scalar to 1 or 0
+    void set_delivery(bool on);      // set the delivery gate scalar, on only for the early generated tokens
+    void set_direction(int layer, const float * r, float ceil, const float * r2, float ceil2, const float * r3, float ceil3);
 
 private:
     std::vector<ggml_context_ptr> ctxs;
     std::vector<ggml_backend_buffer_ptr> bufs;
-    std::vector<ggml_tensor *> t_dir, t_ceil, t_dir2, t_ceil2;  // per layer: refusal dir/ref, disclaimer dir/ref
-    ggml_tensor * t_gate = nullptr;                             // [1], runtime 0/1
+    std::vector<ggml_tensor *> t_dir, t_ceil, t_dir2, t_ceil2, t_dir3, t_ceil3;  // per layer: refusal, disclaimer, delivery dir/ref
+    ggml_tensor * t_gate = nullptr;      // [1], runtime 0/1 for refusal and disclaimer
+    ggml_tensor * t_deliver = nullptr;   // [1], runtime 0/1 for the early delivery clamp
 };
 
 //

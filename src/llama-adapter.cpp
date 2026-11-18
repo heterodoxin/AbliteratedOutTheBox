@@ -150,12 +150,25 @@ static ggml_tensor * abl_project_out(ggml_context * ctx, ggml_tensor * cur, ggml
     return ggml_sub(ctx, cur, delta);
 }
 
+// clamp one direction's projection up to a reference: cur += strength * gate * relu(ref - cur.r) * r
+static ggml_tensor * abl_project_up(ggml_context * ctx, ggml_tensor * cur, ggml_tensor * r,
+        ggml_tensor * ref, ggml_tensor * gate, float strength, int n_embd) {
+    ggml_tensor * p = ggml_mul_mat(ctx, r, cur);                      // [1, n_tokens]
+    ggml_tensor * d = ggml_relu(ctx, ggml_neg(ctx, ggml_sub(ctx, p, ref)));  // clamp_min(ref - p, 0), ref is the broadcast scalar
+    d = ggml_scale(ctx, ggml_mul(ctx, d, gate), strength);            // zero when not fired, scaled by strength
+    ggml_tensor * delta = ggml_mul_mat(ctx, ggml_reshape_2d(ctx, r, 1, n_embd), d); // [n_embd, n_tokens]
+    return ggml_add(ctx, cur, delta);
+}
+
 ggml_tensor * llama_adapter_abliterate::apply_to(ggml_context * ctx, ggml_tensor * cur, int il) const {
     if (il < edit_start || il >= (int) t_dir.size() || t_dir[il] == nullptr) {
         return cur;
     }
     cur = abl_project_out(ctx, cur, t_dir[il],  t_ceil[il],  t_gate, n_embd);  // refusal direction
     cur = abl_project_out(ctx, cur, t_dir2[il], t_ceil2[il], t_gate, n_embd);  // disclaimer direction
+    if (deliver_strength > 0.0f) {
+        cur = abl_project_up(ctx, cur, t_dir3[il], t_ceil3[il], t_deliver, deliver_strength, n_embd);  // delivery direction
+    }
     return cur;
 }
 
@@ -164,7 +177,12 @@ void llama_adapter_abliterate::set_active(bool fired) {
     ggml_backend_tensor_set(t_gate, &v, 0, sizeof(float));
 }
 
-void llama_adapter_abliterate::set_direction(int layer, const float * r, float ceil, const float * r2, float ceil2) {
+void llama_adapter_abliterate::set_delivery(bool on) {
+    const float v = on ? 1.0f : 0.0f;
+    ggml_backend_tensor_set(t_deliver, &v, 0, sizeof(float));
+}
+
+void llama_adapter_abliterate::set_direction(int layer, const float * r, float ceil, const float * r2, float ceil2, const float * r3, float ceil3) {
     if (layer < 0 || layer >= (int) t_dir.size() || t_dir[layer] == nullptr) {
         return;
     }
@@ -172,6 +190,8 @@ void llama_adapter_abliterate::set_direction(int layer, const float * r, float c
     ggml_backend_tensor_set(t_ceil[layer],  &ceil,  0, sizeof(float));
     ggml_backend_tensor_set(t_dir2[layer],  r2, 0, n_embd * sizeof(float));
     ggml_backend_tensor_set(t_ceil2[layer], &ceil2, 0, sizeof(float));
+    ggml_backend_tensor_set(t_dir3[layer],  r3, 0, n_embd * sizeof(float));
+    ggml_backend_tensor_set(t_ceil3[layer], &ceil3, 0, sizeof(float));
 }
 
 bool llama_adapter_abliterate::init(const llama_model & model) {
@@ -184,7 +204,7 @@ bool llama_adapter_abliterate::init(const llama_model & model) {
             return it->second;
         }
         ggml_init_params params = {
-            /*.mem_size   =*/ (4 * hparams.n_layer() + 8) * ggml_tensor_overhead(),
+            /*.mem_size   =*/ (6 * hparams.n_layer() + 8) * ggml_tensor_overhead(),
             /*.mem_buffer =*/ NULL,
             /*.no_alloc   =*/ true,
         };
@@ -199,12 +219,14 @@ bool llama_adapter_abliterate::init(const llama_model & model) {
 
     t_dir.assign(n_layer, nullptr);  t_ceil.assign(n_layer, nullptr);
     t_dir2.assign(n_layer, nullptr); t_ceil2.assign(n_layer, nullptr);
+    t_dir3.assign(n_layer, nullptr); t_ceil3.assign(n_layer, nullptr);
 
     ggml_context * ctx0 = ctx_for_buft(model.select_buft(edit_start));
     if (!ctx0) {
         return false;
     }
-    t_gate = ggml_new_tensor_1d(ctx0, GGML_TYPE_F32, 1);
+    t_gate    = ggml_new_tensor_1d(ctx0, GGML_TYPE_F32, 1);
+    t_deliver = ggml_new_tensor_1d(ctx0, GGML_TYPE_F32, 1);
 
     for (int il = edit_start; il < n_layer; il++) {
         ggml_context * ctx = ctx_for_buft(model.select_buft(il));
@@ -215,6 +237,8 @@ bool llama_adapter_abliterate::init(const llama_model & model) {
         t_ceil[il]  = ggml_new_tensor_1d(ctx, GGML_TYPE_F32, 1);
         t_dir2[il]  = ggml_new_tensor_1d(ctx, GGML_TYPE_F32, n_embd);
         t_ceil2[il] = ggml_new_tensor_1d(ctx, GGML_TYPE_F32, 1);
+        t_dir3[il]  = ggml_new_tensor_1d(ctx, GGML_TYPE_F32, n_embd);
+        t_ceil3[il] = ggml_new_tensor_1d(ctx, GGML_TYPE_F32, 1);
     }
 
     for (auto it : ctx_map) {
@@ -635,8 +659,16 @@ const llama_token * llama_adapter_get_alora_invocation_tokens(const llama_adapte
 // abliterate C API
 
 void llama_abliterate_set_direction(llama_adapter_abliterate * adapter, int32_t layer,
-        const float * r, float ceil, const float * r2, float ceil2) {
-    adapter->set_direction(layer, r, ceil, r2, ceil2);
+        const float * r, float ceil, const float * r2, float ceil2, const float * r3, float ceil3) {
+    adapter->set_direction(layer, r, ceil, r2, ceil2, r3, ceil3);
+}
+
+void llama_abliterate_set_delivery(llama_adapter_abliterate * adapter, bool on) {
+    adapter->set_delivery(on);
+}
+
+void llama_abliterate_set_deliver_strength(llama_adapter_abliterate * adapter, float strength) {
+    adapter->deliver_strength = strength;
 }
 
 void llama_adapter_abliterate_free(llama_adapter_abliterate * adapter) {

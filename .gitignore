@@ -22,6 +22,16 @@
 *.tmp
 *.DS_Store
 
+# Local credentials
+
+.env
+.env.*
+*.pem
+*.key
+credentials*.json
+secrets.*
+/secrets/
+
 # IDE / OS
 
 /.cache/

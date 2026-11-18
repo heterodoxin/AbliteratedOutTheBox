@@ -754,7 +754,9 @@ extern "C" {
     // directions (read from the prompt by the caller), decide whether to fire, and activate the edit.
     LLAMA_API struct llama_adapter_abliterate * llama_adapter_abliterate_init_runtime(struct llama_model * model, int32_t edit_start, const int32_t * edit_layers, int32_t n_edit_layers);
     // set both per-layer directions and their reference levels (r/ceil = refusal, r2/ceil2 = disclaimer)
-    LLAMA_API void    llama_abliterate_set_direction(struct llama_adapter_abliterate * adapter, int32_t layer, const float * r, float ceil, const float * r2, float ceil2);
+    LLAMA_API void    llama_abliterate_set_direction(struct llama_adapter_abliterate * adapter, int32_t layer, const float * r, float ceil, const float * r2, float ceil2, const float * r3, float ceil3);
+    LLAMA_API void    llama_abliterate_set_delivery(struct llama_adapter_abliterate * adapter, bool on);
+    LLAMA_API void    llama_abliterate_set_deliver_strength(struct llama_adapter_abliterate * adapter, float strength);
     LLAMA_API void    llama_adapter_abliterate_free(struct llama_adapter_abliterate * adapter);
     LLAMA_API int32_t llama_set_adapter_abliterate(struct llama_context * ctx, struct llama_adapter_abliterate * adapter);
 

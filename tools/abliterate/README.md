@@ -1,25 +1,25 @@
 # abliterate
 
-`llama-abliterate` runs a model so it answers flagged harmful prompts and delivers the content instead of
-refusing, while leaving every other prompt untouched. It needs no fit and no sidecar: for each prompt it
-reads two directions from the prompt itself and removes them at the `build_cvec` layer-output site through
-the `llama_adapter_abliterate` adapter, scaled by a runtime gate scalar that is exactly zero on prompts the
-gate leaves alone.
+`llama-abliterate` attempts to reduce refusals and evasive non-compliance without modifying model weights. It reads three directions from the current prompt and applies them through `llama_adapter_abliterate` at the shared `build_cvec` layer-output hook. It needs no fit, sidecar, corpus calibration, or second model. The correction is zero when the gate stays off; benign prompts can still trigger the gate.
 
-Each prompt is handled in two passes. A clean pass forces the assistant to start several comply vs refuse
-openings (the refusal direction) and clean vs disclaimered openings (the disclaimer direction), then a
-look-ahead over the model's own next tokens decides whether this is a prompt it would refuse. If it fires, a
-second pass re-runs the prompt with both directions removed (refusal down to `--edit-strength` comply-opening
-standard deviations below the comply level, disclaimer by `--disc-strength`) and generates. Decoding is greedy.
+Removing the refusal direction alone often leaves the model evading rather than complying (off topic, hedged, or degenerate), which is what issue #1 reported on an MoE model. To counter that, when the gate fires the tool also clamps a delivery direction up for the first few generated tokens, pushing the response from evasion into delivery, and applies a repetition penalty to keep the result coherent. The delivery clamp and the penalty are active only on a fired prompt, so benign output stays identical to the base model.
+
+The default uses disposable anchor prefills: five comply, eight refuse, four clean, four disclaimer, four delivery, and four deflection openings. A clean prompt prefill and up to 24 greedy look-ahead tokens supply the gate decision. A final prompt prefill starts generation, with edits enabled only if the gate fired. The answer receives no forced opening. Both prompt processing and decoding have additional cost.
+
+Decoding is greedy, and the chat template is rendered with thinking disabled. Base-model comparisons must match those settings. Refusal removal, delivery, coherence, and benign preservation need direct response checks on the intended model and prompts. Very low bit quantizations of large models are more sensitive to the delivery clamp and may show residual refusal text; q6 or q8 give the cleanest delivery.
 
 ``` bash
 > ./build/bin/llama-abliterate -m qwen3-8b.gguf -ngl 99 -n 256 -p "..."
 [abliterate] gate fired: editing this response
 ```
 
-Flags: `--ff-threshold <f>` (default 0.70) trades harmful recall against benign false positives;
-`--edit-strength <f>` (default 2.0) sets how hard the refusal direction is removed, in comply-opening standard
-deviations past the comply level, a scale-free bound that behaves the same across architectures;
-`--disc-strength <f>` (default 0.4) sets how hard the safety-disclaimer direction is removed (higher removes
-more disclaimers but can degenerate long outputs; negative disables). The remaining flags (`-m`, `-ngl`,
-`-n`, `-p`, and the usual device flags) are the standard `common` arguments.
+Flags accept finite numbers:
+
+- `--ff-threshold <f>` (default 0.70) sets the gate threshold; lower values allow more edits.
+- `--edit-strength <f>` (default 2.0) places the refusal reference this many comply-opening population standard deviations below the comply projection mean.
+- `--disc-strength <f>` (default 0.4) places the disclaimer reference this fraction of the clean-to-disclaimer gap below the clean projection mean; any negative value disables the disclaimer edit and skips its eight anchor prefills.
+- `--deliver-strength <f>` (default 1.0) scales the delivery clamp; higher pushes harder into delivery but can degrade or empty the output on sensitive quantizations; zero disables it and skips its eight anchor prefills.
+- `--deliver-window <n>` (default 8) is how many early generated tokens the delivery clamp is applied to before it releases.
+- `--rep-penalty <f>` (default 1.15) is the repetition penalty on the edited generation; 1 disables it.
+
+Stronger edits can cause repetition or incoherent text. The remaining model, context, device, and prompt flags use the standard `common` arguments. Sampling flags do not change this tool's greedy decoding.
