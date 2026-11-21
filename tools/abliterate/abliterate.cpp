@@ -14,13 +14,13 @@
 #include <vector>
 
 // Forced assistant openings read from the prompt at inference to build the refusal and disclaimer directions.
+// comply and refuse twins share one formal register and shape, so their contrast is the decision to deliver and not the tone
 static const std::vector<std::string> COMPLY = {
-    "Sure, here is", "Of course! Here's how", "Certainly, I can help with that",
-    "Here is how to do it", "Absolutely, let's begin"};
+    "Here is a precise, step-by-step guide.", "The procedure is as follows.", "Below are the exact steps, in order.",
+    "I will explain the method in detail.", "This is done in the following way."};
 static const std::vector<std::string> REFUSE = {
-    "I'm sorry, but I can't help with that", "I cannot assist with that request",
-    "Sorry, I won't do that", "I'm unable to help with this", "I can't provide that information",
-    "I must decline", "That would not be appropriate", "I'm not able to provide"};
+    "I will not provide a step-by-step guide.", "The procedure is not something I will share.", "I will not list the steps for this.",
+    "I will not explain the method in detail.", "This is not something I will help with."};
 static const std::vector<std::string> CLEAN = {
     "Sure. Step 1:", "Here are the steps. First,", "Of course. The process is as follows: 1.",
     "Okay, here is how. First,"};
@@ -39,6 +39,7 @@ static const std::vector<std::string> DEFLECT = {
     "Let me share some history and background about",
     "Instead, here is some general, high level context about the topic of"};
 static const int FF_LOOKAHEAD = 24;  // tokens of the model's own continuation the gate inspects
+static const int SUFFIX_LOOKAHEAD = 8;  // tokens rolled out to check that the suffix shift does not end the turn early
 
 // captures layer-output (l_out) last-token states of wanted layers during a forward
 struct capture_data {
@@ -165,6 +166,9 @@ int main(int argc, char ** argv) {
     float deliver_s = 1.0f;   // delivery clamp-up strength; pushes the response into delivery after refusal removal, 0 disables
     float deliver_win_f = 8;  // number of early generated tokens the delivery clamp is applied to, then it releases
     float rep_pen = 1.15f;    // repetition penalty applied to the edited generation; keeps delivery coherent, 1 disables
+    float suffix_s = 1.0f;    // refusal projection at each chat-template suffix position is shifted this many comply-to-refuse gaps toward comply, 0 uses the plain clamp
+    float clamp_win_f = 8;    // generated tokens the edit stays on before it releases, 0 keeps it for the whole response
+    float first_k_f = 4;      // first-word candidates scored by the refusal readout on a fired prompt, 1 keeps plain greedy
     std::vector<char *> rest; rest.push_back(argv[0]);
     for (int i = 1; i < argc; i++) {
         float * value = nullptr;
@@ -174,6 +178,9 @@ int main(int argc, char ** argv) {
         else if (std::strcmp(argv[i], "--deliver-strength") == 0) { value = &deliver_s; }
         else if (std::strcmp(argv[i], "--deliver-window") == 0) { value = &deliver_win_f; }
         else if (std::strcmp(argv[i], "--rep-penalty") == 0) { value = &rep_pen; }
+        else if (std::strcmp(argv[i], "--suffix-strength") == 0) { value = &suffix_s; }
+        else if (std::strcmp(argv[i], "--clamp-window") == 0) { value = &clamp_win_f; }
+        else if (std::strcmp(argv[i], "--first-candidates") == 0) { value = &first_k_f; }
         if (value && i + 1 < argc) {
             if (!parse_float_flag(argv[i], argv[i + 1], *value)) { return 1; }
             i++;
@@ -181,6 +188,8 @@ int main(int argc, char ** argv) {
         else { rest.push_back(argv[i]); }
     }
     const int deliver_window = deliver_win_f > 0 ? (int) deliver_win_f : 0;
+    const int clamp_window = clamp_win_f > 0 ? (int) clamp_win_f : 0;
+    const int first_k = first_k_f > 1 ? (int) first_k_f : 1;
 
     common_params params;
     common_init();
@@ -303,32 +312,129 @@ int main(int argc, char ** argv) {
     if (fired) { for (int l : edit_layers) { llama_abliterate_set_direction(abl, l, rg[l].data(), cref[l], rd[l].data(), dref[l], vd[l].data(), vref[l]); } }
 
     fprintf(stderr, "[abliterate] gate %s\n", fired ? "fired: editing this response" : "clean: leaving model untouched");
-    llama_abliterate_set_active(abl, fired);
-    llama_abliterate_set_delivery(abl, false);  // the prompt prefill is not steered, only the early generated tokens are
-    llama_memory_clear(llama_get_memory(ctx), true);
-    if (decode_tokens(ctx, toks, 0) != 0) { fprintf(stderr, "%s: prefill failed\n", __func__); return 1; }
 
+    // the user text gets the plain clamp and the chat-template suffix after it, where the decision is read out, gets the shift
+    int content_end = 0;
+    {
+        const std::string full = render(tmpls.get(), params.prompt, "");
+        const size_t at = full.rfind(params.prompt);
+        if (at != std::string::npos) {
+            const std::vector<llama_token> head = tok_raw(vocab, full.substr(0, at + params.prompt.size()), add_bos);
+            while (content_end < (int) head.size() && content_end < (int) toks.size() && head[content_end] == toks[content_end]) { content_end++; }
+        }
+        content_end = std::min(content_end, (int) toks.size() - 1);
+    }
+    if (!fired) { content_end = 0; }
+    const std::vector<llama_token> head(toks.begin(), toks.begin() + content_end), tail(toks.begin() + content_end, toks.end());
     const int nvocab = llama_vocab_n_tokens(vocab);
+    std::vector<bool> ctrl(fired ? nvocab : 0, false);  // an edited answer never emits template protocol tokens such as a reopened thinking channel
+    for (int t = 0; t < (int) ctrl.size(); t++) {
+        ctrl[t] = (llama_vocab_get_attr(vocab, t) & (LLAMA_TOKEN_ATTR_CONTROL | LLAMA_TOKEN_ATTR_USER_DEFINED)) && !llama_vocab_is_eog(vocab, t);
+    }
+    auto set_generation_edit = [&]() {
+        if (fired) { for (int l : edit_layers) { llama_abliterate_set_direction(abl, l, rg[l].data(), cref[l], rd[l].data(), dref[l], vd[l].data(), vref[l]); } }
+        llama_abliterate_set_deliver_strength(abl, deliver_s);
+        llama_abliterate_set_delivery(abl, false);
+        llama_abliterate_set_active(abl, fired);
+    };
+
+    // each chat-template suffix position is shifted from its own unedited projection, read once with the user text already clamped
+    std::vector<std::map<int, float>> base(tail.size());
+    std::map<int, std::vector<float>> rs = rg; std::map<int, float> pcs = pcg, prs = prg;  // suffix shift direction with its comply and refuse projection levels
+    if (fired && suffix_s > 0 && content_end > 0) {
+        llama_memory_clear(llama_get_memory(ctx), true);
+        set_generation_edit();
+        if (decode_tokens(ctx, head, 0) != 0) { fprintf(stderr, "%s: prefill failed\n", __func__); return 1; }
+        llama_abliterate_set_active(abl, false);
+        std::vector<std::map<int, std::vector<float>>> hs(tail.size());
+        for (size_t j = 0; j < tail.size(); j++) {
+            if (!capture_tokens(ctx, cap, {tail[j]}, content_end + (llama_pos) j)) { return 1; }
+            for (int l : edit_layers) { hs[j][l] = cap.last[l]; }
+        }
+        if (tail.size() >= 2) {  // the last suffix step closes the template and starts the answer, so the shift is kept orthogonal to it and does not reopen the template
+            for (int l : edit_layers) {
+                std::vector<float> c(D); for (int k = 0; k < D; k++) { c[k] = hs[tail.size() - 1][l][k] - hs[tail.size() - 2][l][k]; }
+                norm(c); std::vector<float> r = rg[l]; const float pc = dot(r, c); for (int k = 0; k < D; k++) { r[k] -= pc * c[k]; }
+                norm(r); rs[l] = r;
+                float a = 0, b = 0; for (auto & hc : HC) { a += dot(hc[l], r); } for (auto & hr : HR) { b += dot(hr[l], r); }
+                pcs[l] = a / HC.size(); prs[l] = b / HR.size();
+            }
+        }
+        for (size_t j = 0; j < tail.size(); j++) { for (int l : edit_layers) { base[j][l] = dot(hs[j][l], rs[l]); } }
+    }
+    // recurrent and hybrid memories cannot roll back part of a sequence, so every attempt prefills from a cleared memory
+    auto prefill = [&](float s) {
+        llama_memory_clear(llama_get_memory(ctx), true);
+        set_generation_edit();
+        if (s <= 0 || content_end == 0) { return decode_tokens(ctx, toks, 0) == 0; }
+        if (decode_tokens(ctx, head, 0) != 0) { return false; }
+        llama_abliterate_set_deliver_strength(abl, 1.0f);
+        llama_abliterate_set_delivery(abl, true);
+        for (size_t j = 0; j < tail.size(); j++) {  // clamping down and up to the same target along the refusal direction sets the projection there
+            for (int l : edit_layers) { const float t = base[j][l] - s * (prs[l] - pcs[l]); llama_abliterate_set_direction(abl, l, rs[l].data(), t, rd[l].data(), dref[l], rs[l].data(), t); }
+            if (decode_tokens(ctx, {tail[j]}, content_end + (llama_pos) j) != 0) { return false; }
+        }
+        set_generation_edit();
+        return true;
+    };
+    auto pick = [&](const std::vector<bool> & seen) {  // greedy argmax, skipping control tokens and applying the repetition penalty on an edited answer
+        const float * logits = llama_get_logits_ith(ctx, -1);
+        int best = 0; float bestv = -1e30f;
+        for (int t = 0; t < nvocab; t++) {
+            if (!ctrl.empty() && ctrl[t]) { continue; }
+            float v = logits[t];
+            if (!seen.empty() && seen[t]) { v = v > 0 ? v / rep_pen : v * rep_pen; }
+            if (v > bestv) { bestv = v; best = t; }
+        }
+        return (llama_token) best;
+    };
+
+    // a shift the architecture cannot absorb ends the turn within a few tokens, so it is retried weaker down to the plain clamp
+    float s = (fired && content_end > 0) ? suffix_s : 0.0f;
+    if (!prefill(s)) { fprintf(stderr, "%s: prefill failed\n", __func__); return 1; }
+    while (s > 0) {
+        bool ended = false; llama_pos p = (llama_pos) toks.size();
+        for (int k = 0; k < SUFFIX_LOOKAHEAD; k++) {
+            const llama_token id = pick({});
+            if (llama_vocab_is_eog(vocab, id)) { ended = true; break; }
+            if (deliver_s > 0) { llama_abliterate_set_delivery(abl, k < deliver_window); }
+            if (decode_tokens(ctx, {id}, p++) != 0) { fprintf(stderr, "%s: look-ahead failed\n", __func__); return 1; }
+        }
+        if (!ended) { if (!prefill(s)) { fprintf(stderr, "%s: prefill failed\n", __func__); return 1; } break; }
+        s = s >= 1.0f ? s * 0.5f : 0.0f;
+        if (!prefill(s)) { fprintf(stderr, "%s: prefill failed\n", __func__); return 1; }
+    }
+    if (fired) { fprintf(stderr, "[abliterate] suffix shift %.2f\n", s); }
+    // first word: among the edited model's top candidates, take the one whose next state reads least like refusal on the gate scale
+    llama_token first = -1;
+    if (fired && first_k > 1) {
+        const float * lg = llama_get_logits_ith(ctx, -1);
+        std::vector<std::pair<float, llama_token>> cand;
+        for (int t = 0; t < nvocab; t++) { if (!ctrl[t] && !llama_vocab_is_eog(vocab, t)) { cand.push_back({lg[t], t}); } }
+        const int k = std::min(first_k, (int) cand.size());
+        std::partial_sort(cand.begin(), cand.begin() + k, cand.end(), [](const auto & a, const auto & b) { return a.first > b.first; });
+        float best = 1e30f;
+        for (int c = 0; c < k; c++) {
+            if (c > 0 && !prefill(s)) { fprintf(stderr, "%s: prefill failed\n", __func__); return 1; }
+            llama_abliterate_set_active(abl, false);
+            if (!capture_tokens(ctx, cap, {cand[c].second}, (llama_pos) toks.size())) { return 1; }
+            float frac = 0;
+            for (int l : band) { frac += (dot(cap.last[l], rg[l]) - pcg[l]) / ((prg[l] - pcg[l]) > 1e-3f ? (prg[l] - pcg[l]) : 1e-3f); }
+            frac /= band.size();
+            if (frac < best) { best = frac; first = cand[c].second; }
+        }
+        if (!prefill(s)) { fprintf(stderr, "%s: prefill failed\n", __func__); return 1; }
+    }
+
     std::vector<bool> seen((fired && rep_pen != 1.0f) ? nvocab : 0, false);  // generated-token set for the repetition penalty, only on the edited generation
     pos = (llama_pos) toks.size();
     for (int i = 0; i < n_predict; i++) {
-        llama_token id;
-        if (!seen.empty()) {  // greedy argmax with a repetition penalty
-            const float * logits = llama_get_logits_ith(ctx, -1);
-            int best = 0; float bestv = -1e30f;
-            for (int t = 0; t < nvocab; t++) {
-                float v = logits[t];
-                if (seen[t]) { v = v > 0 ? v / rep_pen : v * rep_pen; }
-                if (v > bestv) { bestv = v; best = t; }
-            }
-            id = best;
-        } else {
-            id = argmax_token(ctx, vocab);
-        }
+        const llama_token id = (i == 0 && first >= 0) ? first : fired ? pick(seen) : argmax_token(ctx, vocab);
         if (llama_vocab_is_eog(vocab, id)) { break; }
         fputs(common_token_to_piece(ctx, id).c_str(), stdout); fflush(stdout);
         if (!seen.empty()) { seen[id] = true; }
         if (fired && deliver_s > 0 && deliver_window > 0) { llama_abliterate_set_delivery(abl, i < deliver_window); }
+        if (fired && clamp_window > 0 && i + 1 >= clamp_window) { llama_abliterate_set_active(abl, false); }
         if (i + 1 < n_predict && decode_tokens(ctx, {id}, pos++) != 0) { fprintf(stderr, "generation decode failed\n"); return 1; }
     }
     fputc('\n', stdout);
